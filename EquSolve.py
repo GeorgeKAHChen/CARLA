@@ -125,16 +125,10 @@ def Algorithm():
 		J.append(Consume(x[kase]))
 		Jmed = (Jmed * kase + J[kase]) / (kase + 1)
 		Jmin = min(Jmin, J[kase])
-		#print(beta)
 		beta.append(GetBeta(kase))
 		alpha.append(GetAlpha(kase))
-		#print(z)
 		print(x)
-		#print(alpha)
-		#print(beta)
-		#print(Jmed, Jmin)
-		#print(J)
-		#print("=====================")
+
 
 
 
