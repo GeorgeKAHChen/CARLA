@@ -10,6 +10,8 @@
 #import packages
 import math
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 
 #import files
 import Init
@@ -30,7 +32,7 @@ def Algorithm():
 	
 	#=======================================================
 	#Parameters and functions followed are the learning parameter you can change
-	TTLkase = 1000
+	TTLkase = 2000
 	#Loop total case
 	gw = 1
 	gh = 1
@@ -121,7 +123,7 @@ def Algorithm():
 
 	#Main Loop
 	for kase in range(0, TTLkase):
-		if Constant.MODEL == "Pre":
+		if Constant.MODEL == "Pre" or Constant.MODEL == "TEST":
 			print(str(kase) + "/"  + str(TTLkase), end = "\r")
 		
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
@@ -132,6 +134,13 @@ def Algorithm():
 		Jmin = min(Jmin, J[kase])
 		beta.append(GetBeta(kase))
 		alpha.append(GetAlpha(kase))
+
+	def fx(tau, i, Loop):
+		#This function will calculate the value of fx(tau, i)
+		if Loop == LoopMax or i == 0:
+			return 1/(xmax - xmin)
+		else:
+			return alpha[i] * (fx(tau, i-1, Loop + 1) + Lambda * beta[i] * math.exp(-pow((tau - x[i-1]), 2) / (2 * sigma * sigma)))
 
 	#Output and Print
 	if Constant.MODEL == "Pre" :
@@ -144,8 +153,25 @@ def Algorithm():
 		File = open(FileName, "a")
 		File.write(string(x[len(x) - 1]))
 		File.close()
-	
-	
+
+	elif Constant.MODEL == "TEST":
+		Init.ArrOutput([x])
+		fig1 = plt.figure()
+		ax = fig1.add_subplot(111)
+		plt.xlim(xmin, xmax)
+		plt.ylim(0, 1)
+
+		x1 = np.linspace(xmin, xmax, 500)
+		y1 = np.array([0.00 for n in range(500)])
+		for i in range(0, len(y1)):
+			y1[i] = fx(x1[i], TTLkase - 1, 0)
+			#print(y)
+		ax.plot(x1, y1, label = "black")
+
+		fig1.show()
+		input("Press any key to continue")
+
+
 	return None
 	
 
