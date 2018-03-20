@@ -145,13 +145,21 @@ def Algorithm():
 	#Output and Print
 	if Constant.MODEL == "Pre" :
 		print(str(TTLkase) + "/"  + str(TTLkase), end = "\n")
-		print(x[len(x) - 1])
+		x1 = np.linspace(xmin, xmax, 500)
+		maxx = 0
+		maxy = 0
+		for i in range(0, len(x1)):
+			y1 = fx(x1[i], TTLkase - 1, 0)
+			if y1 >= maxy:
+				maxy = y1
+				maxx = x1[i]
+		print(string(maxx))
 	
 	elif Constant.MODEL == "VPS":
 		x1 = np.linspace(xmin, xmax, 500)
 		maxx = 0
 		maxy = 0
-		for i in range(0, len(y1)):
+		for i in range(0, len(x1)):
 			y1 = fx(x1[i], TTLkase - 1, 0)
 			if y1 >= maxy:
 				maxy = y1
@@ -160,7 +168,7 @@ def Algorithm():
 		FileName = "SavingData"
 		Init.BuildFile(FileName)
 		File = open(FileName, "a")
-		File.write(string(maxx))
+		File.write(string(maxx) + "\n")
 		File.close()
 
 	elif Constant.MODEL == "TEST":
