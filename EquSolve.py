@@ -32,10 +32,10 @@ def Algorithm():
 	
 	#=======================================================
 	#Parameters and functions followed are the learning parameter you can change
-	TTLkase = 2000
+	TTLkase = 1000
 	#Loop total case
-	gw = 1
-	gh = 1
+	gw = 0.02
+	gh = 0.3
 	#Parameter about the converge speed in H(x, x_i)
 	LoopMax = 500
 	#Parameter which can change the iteration times to uniform distribution in Newton' method
@@ -148,14 +148,23 @@ def Algorithm():
 		print(x[len(x) - 1])
 	
 	elif Constant.MODEL == "VPS":
+		x1 = np.linspace(xmin, xmax, 500)
+		maxx = 0
+		maxy = 0
+		for i in range(0, len(y1)):
+			y1 = fx(x1[i], TTLkase - 1, 0)
+			if y1 >= maxy:
+				maxy = y1
+				maxx = x1[i]
+
 		FileName = "SavingData"
 		Init.BuildFile(FileName)
 		File = open(FileName, "a")
-		File.write(string(x[len(x) - 1]))
+		File.write(string(maxx))
 		File.close()
 
 	elif Constant.MODEL == "TEST":
-		Init.ArrOutput([x])
+		Init.ArrOutput([alpha, beta, x])
 		fig1 = plt.figure()
 		ax = fig1.add_subplot(111)
 		plt.xlim(xmin, xmax)
