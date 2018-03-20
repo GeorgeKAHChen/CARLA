@@ -7,16 +7,17 @@
 ############################################################
 
 #This file will use CARLA method to solve the problem of equation solve.
-
+#import packages
 import math
 import random
 
-
+#import files
 import Init
-
+import Constant
 
 
 def Algorithm():
+	Init.StaClear()
 	#=======================================================
 	#Parameters and functions followed are the learning object you can change
 	xmin = 0.00
@@ -36,6 +37,7 @@ def Algorithm():
 	#Parameter about the converge speed in H(x, x_i)
 	LoopMax = 500
 	#Parameter which can change the iteration times to uniform distribution in Newton' method
+
 
 	#=======================================================
 	#DO NOT CHANGE ANYTHING BELOW!!
@@ -119,10 +121,10 @@ def Algorithm():
 
 	#Main Loop
 	for kase in range(0, TTLkase):
-		print(str(kase) + "/"  + str(TTLkase), end = "\r")
+		if Constant.MODEL == "Pre":
+			print(str(kase) + "/"  + str(TTLkase), end = "\r")
+		
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
-		#print(kase)
-
 		z = random.random()
 		x.append(GetX(z, kase))
 		J.append(Consume(x[kase]))
@@ -130,15 +132,27 @@ def Algorithm():
 		Jmin = min(Jmin, J[kase])
 		beta.append(GetBeta(kase))
 		alpha.append(GetAlpha(kase))
-		
-		#print(J[kase], Jmed, Jmin)
-		#print(alpha)
-		#print(beta)
-		#input()
-		#print(x[kase])
-	print(x[len(x) - 1])
-	print(str(TTLkase) + "/"  + str(TTLkase), end = "\n")
-Algorithm()
+
+	#Output and Print
+	if Constant.MODEL == "Pre" :
+		print(str(TTLkase) + "/"  + str(TTLkase), end = "\n")
+		print(x[len(x) - 1])
+	
+	elif Constant.MODEL == "VPS":
+		FileName = "SavingData"
+		Init.BuildFile(FileName)
+		File = open(FileName, "a")
+		File.write(string(x[len(x) - 1]))
+		File.close()
+	
+	
+	return None
+	
+
+
+for i in range(0, 100):
+	Algorithm()
+
 
 
 
