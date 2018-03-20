@@ -12,6 +12,8 @@ import math
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from copy import deepcopy
+
 
 #import files
 import Init
@@ -32,12 +34,12 @@ def Algorithm():
 	
 	#=======================================================
 	#Parameters and functions followed are the learning parameter you can change
-	TTLkase = 1000
+	TTLkase = 500
 	#Loop total case
 	gw = 0.02
 	gh = 0.3
 	#Parameter about the converge speed in H(x, x_i)
-	LoopMax = 500
+	LoopMax = TTLkase
 	#Parameter which can change the iteration times to uniform distribution in Newton' method
 
 
@@ -109,10 +111,10 @@ def Algorithm():
 
 	def GetBeta(i):
 		#This function will get the parameter beta in the next loop
-		if Jmed - Jmin == 0:
+		if abs(Jmed - Jmin) < 0.00001:
 			return 0
 		else:
-			return max(0, (Jmed - J[i]) / (Jmed - Jmin))
+			return max(0, ((Jmed - J[i]) / (Jmed - Jmin)) )
 
 
 	def GetAlpha(i):
@@ -121,19 +123,15 @@ def Algorithm():
 		return 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
 
 
-	#Main Loop
-	for kase in range(0, TTLkase):
-		if Constant.MODEL == "Pre" or Constant.MODEL == "TEST":
-			print(str(kase) + "/"  + str(TTLkase), end = "\r")
-		
-		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
-		z = random.random()
-		x.append(GetX(z, kase))
-		J.append(Consume(x[kase]))
-		Jmed = (Jmed * kase + J[kase]) / (kase + 1)
-		Jmin = min(Jmin, J[kase])
-		beta.append(GetBeta(kase))
-		alpha.append(GetAlpha(kase))
+	def GetJmed(i):
+		#This function will get the J_med
+		Arr = deepcopy(J)
+		Arr.sort()
+		if i % 2 == 0:
+			return Arr[i//2]
+		else:
+			return (Arr[i//2] + Arr[(i+1)//2]) / 2
+
 
 	def fx(tau, i, Loop):
 		#This function will calculate the value of fx(tau, i)
@@ -142,9 +140,42 @@ def Algorithm():
 		else:
 			return alpha[i] * (fx(tau, i-1, Loop + 1) + Lambda * beta[i] * math.exp(-pow((tau - x[i-1]), 2) / (2 * sigma * sigma)))
 
+
+	#Main Loop
+	for kase in range(0, TTLkase):
+		if Constant.MODEL == "PRE" or Constant.MODEL == "TEST":
+			print(str(kase) + "/"  + str(TTLkase), end = "\r")
+		
+		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
+		z = random.random()
+		x.append(GetX(z, kase))
+		J.append(Consume(x[kase]))
+		Jmed = GetJmed(kase)
+		Jmin = min(Jmin, J[kase])
+		if (Jmed - J[kase]) <= 0:
+			beta.append(0)
+		else:
+			beta.append(GetBeta(kase))
+		alpha.append(GetAlpha(kase))
+		#print(str(J[kase]) + "\t" + str(Jmin) + "\t" + str(Jmed) + "\t" + str(beta[kase-1]) + "\t" + str(Jmed - J[kase]), end = "\n")
+		#print(str(beta[kase+1]) + "\t" + str(Jmed - J[kase]), end = "\n")
+		#print(str(Jmed - J[kase]) + "\t" + str(Jmed) + "\t" + str(beta[kase+1]) + "\t" + str(J[kase]))
+		if kase != 0:
+			x1 = np.linspace(xmin, xmax, 500)
+			maxx = 0
+			maxy = 0
+			for i in range(0, len(x1)):
+				y1 = fx(x1[i], kase - 1, 0)
+				if y1 >= maxy:
+					maxy = y1
+					maxx = x1[i]
+			#print(str(maxx) + "\t" + str(x[kase]))
+
 	#Output and Print
-	if Constant.MODEL == "Pre" :
+	#You can change the model of output in the file named Constant.py
+	if Constant.MODEL == "PRE" :
 		print(str(TTLkase) + "/"  + str(TTLkase), end = "\n")
+		#Init.ArrOutput([x])
 		x1 = np.linspace(xmin, xmax, 500)
 		maxx = 0
 		maxy = 0
@@ -153,7 +184,7 @@ def Algorithm():
 			if y1 >= maxy:
 				maxy = y1
 				maxx = x1[i]
-		print(string(maxx))
+		print(str(maxx), x[TTLkase])
 	
 	elif Constant.MODEL == "VPS":
 		x1 = np.linspace(xmin, xmax, 500)
@@ -168,7 +199,7 @@ def Algorithm():
 		FileName = "SavingData"
 		Init.BuildFile(FileName)
 		File = open(FileName, "a")
-		File.write(string(maxx) + "\n")
+		File.write(str(maxx) + "\t" + str(x[TTLkase]) + "\n")
 		File.close()
 
 	elif Constant.MODEL == "TEST":
@@ -193,8 +224,8 @@ def Algorithm():
 	
 
 
-for i in range(0, 100):
-	Algorithm()
+#for i in range(0, 100):
+Algorithm()
 
 
 
