@@ -164,38 +164,41 @@ def Algorithm():
 		
 		if Constant.MODEL == "TEST":
 			x1 = np.linspace(xmin, xmax, 500)
-			FinIntegral = 0
 			maxx = 0
 			maxy = 0
 			if kase != 0:
-				for i in range(1, len(x1)):
+				for i in range(0, len(x1)):
 					y1 = fx(x1[i], kase - 1, 0)
-					if y1 > maxy:
-						maxx = x1[i]
+					if y1 >= maxy:
 						maxy = y1
+						maxx = x1[i]
 
 			SavStr += (str(Jmed) + "\t" + str(maxx) + "\n")
-			print(SavStr, end = "\r")
+
 
 	#Get the maxinum of PDF
 	x1 = np.linspace(xmin, xmax, 500)
-	FinIntegral = 0
 	maxx = 0
 	maxy = 0
-	for i in range(1, len(x1)):
+	for i in range(0, len(x1)):
 		y1 = fx(x1[i], TTLkase - 1, 0)
-		if y1 > maxy:
-			maxx = x1[i]
+		if y1 >= maxy:
 			maxy = y1
-	print(str(maxx))
+			maxx = x1[i]
+
 
 	#Output and Print
 	#You can change the model of output in the file named Constant.py
 	if Constant.MODEL == "PRE" :
-		pass
+		print(str(TTLkase) + "/"  + str(TTLkase), end = "\n")
+		print(str(maxx))
 	
 	elif Constant.MODEL == "VPS":
-		pass
+		FileName = "SavingData"
+		Init.BuildFile(FileName)
+		File = open(FileName, "a")
+		File.write(str(maxx) + "\t" + "\n")
+		File.close()
 
 	elif Constant.MODEL == "TEST":
 		FileName = "SavingJmed"
@@ -204,7 +207,6 @@ def Algorithm():
 		File.write(SavStr)
 		File.close()
 
-		"""
 		Init.ArrOutput([alpha, beta, x])
 		fig1 = plt.figure()
 		ax = fig1.add_subplot(111)
@@ -220,7 +222,7 @@ def Algorithm():
 
 		fig1.show()
 		input("Press any key to continue")
-		"""
+
 
 	return None
 	

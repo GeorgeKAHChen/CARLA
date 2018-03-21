@@ -7,7 +7,7 @@
 ############################################################
 #Here are constants of all the program
 
-MODEL = "VPS"
+MODEL = "TEST"
 #This parameter is using for model of all algorithm
 #"VPS" means this program will work on vps and not print anything.
 #"PRE" means this program will use in presentation and will print all data
