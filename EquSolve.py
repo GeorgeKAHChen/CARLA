@@ -1,7 +1,7 @@
 ############################################################
 #
 #		CARLA - Equation Solve
-#		Copyright(c) KazukiAmakawa, all right reserved.
+#		CopyriConstant.ght(c) KazukiAmakawa, all riConstant.ght reserved.
 #		EquSolve.py
 #
 ############################################################
@@ -22,29 +22,7 @@ import Constant
 
 def Algorithm():
 	Init.StaClear()
-	#=======================================================
-	#Parameters and functions followed are the learning object you can change
-	xmin = 0.00
-	xmax = 2.00
-	#Interval min and max
-	def Consume(x):
-		#This function is used as consume function for every action
-		#You can change your parameter if you want to learn other things
-		return abs(pow(e, x) - 2)
 	
-	#=======================================================
-	#Parameters and functions followed are the learning parameter you can change
-	TTLkase = 1000
-	#Loop total case
-	gw = 0.02
-	gh = 0.3
-	#Parameter about the converge speed in H(x, x_i)
-	LoopMax = 700
-	#Parameter which can change the iteration times to uniform distribution in Newton' method
-
-
-	#=======================================================
-	#DO NOT CHANGE ANYTHING BELOW!!
 	e = math.e
 	pi = math.pi
 	#Constants
@@ -68,8 +46,8 @@ def Algorithm():
 	beta = [0]
 	#Reinforcement learning parameter
 	
-	Lambda = gw * (xmax - xmin)
-	sigma = gh / (xmax - xmin)
+	Lambda = Constant.gw * (Constant.xmax - Constant.xmin)
+	sigma = Constant.gh / (Constant.xmax - Constant.xmin)
 	#Parameter actually used in integral
 
 	SavStr = ""
@@ -78,25 +56,25 @@ def Algorithm():
 
 	def F(delta, i, Loop):
 		#This function will calculate the value of f(delta, i)
-		if Loop == LoopMax or i == 0:
-			return (delta - xmin) / (xmax - xmin)
+		if Loop == Constant.LoopMax or i == 0:
+			return (delta - Constant.xmin) / (Constant.xmax - Constant.xmin)
 		else:
-			tem = math.erf((delta - x[i-1]) / sigma) - math.erf((xmin - x[i-1]) / sigma)
+			tem = math.erf((delta - x[i-1]) / sigma) - math.erf((Constant.xmin - x[i-1]) / sigma)
 			return alpha[i] * F(delta, i-1, Loop + 1) + math.sqrt(2 * pi) / 2 * alpha[i] * beta[i] * Lambda * sigma * tem  
 
 
 	def dF(delta, i, Loop):
 		#This function will calculate the value of F'_x(delta, i)
-		if Loop == LoopMax or i == 0:
-			return 1 / (xmax - xmin)
+		if Loop == Constant.LoopMax or i == 0:
+			return 1 / (Constant.xmax - Constant.xmin)
 		else:
-			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp(- pow((delta - x[i-1]) / sigma) , 2 )
+			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp(- pow((delta - x[i-1]) / sigma, 2 ))
 
 
-	def GetX(z, i, xinit = (xmax + xmin) / 2):
+	def GetX(z, i, xinit = (Constant.xmax + Constant.xmin) / 2):
 		#This function will get the value x in the integral with variable upper
 		if i == 0:
-			return xmin + z * (xmax - xmin)
+			return Constant.xmin + z * (Constant.xmax - Constant.xmin)
 		else:
 			#Use Newton's method to iterator
 			RemDelta = 0.00
@@ -123,7 +101,7 @@ def Algorithm():
 
 	def GetAlpha(i):
 		#This function will get the parameter alpha in the next loop
-		tem = math.erf((xmax - x[i]) / sigma) - math.erf((xmin - x[i]) / sigma)
+		tem = math.erf((Constant.xmax - x[i]) / sigma) - math.erf((Constant.xmin - x[i]) / sigma)
 		return 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
 
 
@@ -139,21 +117,21 @@ def Algorithm():
 
 	def fx(tau, i, Loop):
 		#This function will calculate the value of fx(tau, i)
-		if Loop == LoopMax or i == 0:
-			return 1/(xmax - xmin)
+		if Loop == Constant.LoopMax or i == 0:
+			return 1/(Constant.xmax - Constant.xmin)
 		else:
 			return alpha[i] * (fx(tau, i-1, Loop + 1) + Lambda * beta[i] * math.exp(-pow((tau - x[i-1]), 2) / (2 * sigma * sigma)))
 
 
 	#Main Loop
-	for kase in range(0, TTLkase):
+	for kase in range(0, Constant.TTLkase):
 		if Constant.MODEL == "PRE" or Constant.MODEL == "TEST":
-			print(str(kase) + "/"  + str(TTLkase), end = "\r")
+			print(str(kase) + "/"  + str(Constant.TTLkase), end = "\r")
 		
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
 		z = random.random()
 		x.append(GetX(z, kase))
-		J.append(Consume(x[kase]))
+		J.append(Constant.Consume(x[kase]))
 		Jmed = GetJmed(kase)
 		Jmin = min(Jmin, J[kase])
 		if (Jmed - J[kase]) <= 0:
@@ -163,7 +141,7 @@ def Algorithm():
 		alpha.append(GetAlpha(kase))
 		
 		if Constant.MODEL == "TEST":
-			x1 = np.linspace(xmin, xmax, 500)
+			x1 = np.linspace(Constant.xmin, Constant.xmax, 500)
 			FinIntegral = 0
 			maxx = 0
 			maxy = 0
@@ -178,12 +156,12 @@ def Algorithm():
 			print(SavStr, end = "\r")
 
 	#Get the maxinum of PDF
-	x1 = np.linspace(xmin, xmax, 500)
+	x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
 	FinIntegral = 0
 	maxx = 0
 	maxy = 0
 	for i in range(1, len(x1)):
-		y1 = fx(x1[i], TTLkase - 1, 0)
+		y1 = fx(x1[i], Constant.TTLkase - 1, 0)
 		if y1 > maxy:
 			maxx = x1[i]
 			maxy = y1
@@ -208,14 +186,14 @@ def Algorithm():
 		Init.ArrOutput([alpha, beta, x])
 		fig1 = plt.figure()
 		ax = fig1.add_subplot(111)
-		plt.xlim(xmin, xmax)
+		plt.xlim(Constant.xmin, Constant.xmax)
 		plt.ylim(0, 5)
 
 		print(str(maxx))
 
 		y1 = np.array([0.00 for n in range(500)])
 		for i in range(0, len(y1)):
-			y1[i] = fx(x1[i], TTLkase - 1, 0)
+			y1[i] = fx(x1[i], Constant.TTLkase - 1, 0)
 		ax.plot(x1, y1, label = "black")
 
 		fig1.show()
