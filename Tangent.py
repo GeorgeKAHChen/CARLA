@@ -40,7 +40,7 @@ def Algorithm():
 
 	#=======================================================
 	#Parameters and functions followed are the learning parameter you can change
-	TTLkase = 500
+	TTLkase = 1000
 	#Loop total case
 	gw = 0.02
 	gh = 0.3
@@ -96,7 +96,7 @@ def Algorithm():
 		if Loop == LoopMax or i == 0:
 			return 1 / (xmax - xmin)
 		else:
-			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp(- pow((delta - x[i-1]) / sigma) , 2 )
+			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp(- pow((delta - x[i-1]) / sigma, 2))
 
 
 	def GetX(z, i, xinit = (xmax + xmin) / 2):
