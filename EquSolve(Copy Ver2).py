@@ -78,27 +78,19 @@ def Algorithm():
 
 	def F(delta, i, Loop):
 		#This function will calculate the value of f(delta, i)
-		Stack = (delta - xmin) / (xmax - xmin)
-		for kase in range(1, i):
-			tem = math.erf((delta - x[kase-1]) / sigma) - math.erf((xmin - x[kase-1]) / sigma)
-			Stack = alpha[kase] * ( Stack + math.sqrt(2 * pi) / 2 * beta[kase] * Lambda * sigma * tem )
-		return Stack
+		if Loop == LoopMax or i == 0:
+			return (delta - xmin) / (xmax - xmin)
+		else:
+			tem = math.erf((delta - x[i-1]) / sigma) - math.erf((xmin - x[i-1]) / sigma)
+			return alpha[i] * F(delta, i-1, Loop + 1) + math.sqrt(2 * pi) / 2 * alpha[i] * beta[i] * Lambda * sigma * tem  
 
 
 	def dF(delta, i, Loop):
 		#This function will calculate the value of F'_x(delta, i)
-		Stack = 1 / (xmax - xmin)
-		for kase in range(1, i):
-			Stack = alpha[kase] * ( Stack + math.sqrt(2) * beta[kase] * Lambda * sigma * math.exp((delta - x[kase-1]) / sigma) ) 
-		return Stack
-
-
-	def fx(tau, i, Loop):
-		#This function will calculate the value of fx(tau, i)
-		Stack = 1/(xmax - xmin)
-		for i in range(1, i):
-			Stack = alpha[kase] * ( Stack + Lambda * beta[kase] * math.exp(-pow((tau - x[kase-1]), 2) / (2 * sigma * sigma)) )
-		return Stack
+		if Loop == LoopMax or i == 0:
+			return 1 / (xmax - xmin)
+		else:
+			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp((delta - x[i-1]) / sigma)  
 
 
 	def GetX(z, i, xinit = (xmax + xmin) / 2):
@@ -143,6 +135,14 @@ def Algorithm():
 			return Arr[i//2]
 		else:
 			return (Arr[i//2] + Arr[(i+1)//2]) / 2
+
+
+	def fx(tau, i, Loop):
+		#This function will calculate the value of fx(tau, i)
+		if Loop == LoopMax or i == 0:
+			return 1/(xmax - xmin)
+		else:
+			return alpha[i] * (fx(tau, i-1, Loop + 1) + Lambda * beta[i] * math.exp(-pow((tau - x[i-1]), 2) / (2 * sigma * sigma)))
 
 
 	#Main Loop

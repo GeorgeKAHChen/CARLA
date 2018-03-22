@@ -82,7 +82,7 @@ def Algorithm():
 			return (delta - xmin) / (xmax - xmin)
 		else:
 			tem = math.erf((delta - x[i-1]) / sigma) - math.erf((xmin - x[i-1]) / sigma)
-			return alpha[i] * F(delta, i-1, Loop + 1) + math.sqrt(2 * pi) / 2 * alpha[i] * beta[i] * Lambda * sigma * tem  
+			return alpha[i] * (F(delta, i-1, Loop + 1) + math.sqrt(2 * pi) / 2 * alpha[i] * beta[i] * Lambda * sigma * tem  )
 
 
 	def dF(delta, i, Loop):
@@ -90,7 +90,7 @@ def Algorithm():
 		if Loop == LoopMax or i == 0:
 			return 1 / (xmax - xmin)
 		else:
-			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp((delta - x[i-1]) / sigma)  
+			return alpha[i] * (dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp((delta - x[i-1]) / sigma) ) 
 
 
 	def GetX(z, i, xinit = (xmax + xmin) / 2):
