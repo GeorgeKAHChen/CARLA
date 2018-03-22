@@ -90,7 +90,7 @@ def Algorithm():
 		if Loop == LoopMax or i == 0:
 			return 1 / (xmax - xmin)
 		else:
-			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp((delta - x[i-1]) / sigma)  
+			return alpha[i] * dF(delta, i-1, Loop + 1) + math.sqrt(2) * alpha[i] * beta[i] * Lambda * sigma * math.exp(- pow((delta - x[i-1]) / sigma) , 2 )
 
 
 	def GetX(z, i, xinit = (xmax + xmin) / 2):
