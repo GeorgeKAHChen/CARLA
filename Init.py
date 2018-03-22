@@ -89,7 +89,7 @@ SystemJudge()
 def LogWrite(LogStr, kind):
 	import os
 	import time 
-	FileName = "CRIEA.log"
+	FileName = "CARLA.log"
 		
 	File = open(FileName, "a")
 	Ima = time.ctime()

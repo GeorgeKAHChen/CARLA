@@ -39,7 +39,7 @@ def Algorithm():
 	gw = 0.02
 	gh = 0.3
 	#Parameter about the converge speed in H(x, x_i)
-	LoopMax = 500
+	LoopMax = 700
 	#Parameter which can change the iteration times to uniform distribution in Newton' method
 
 
