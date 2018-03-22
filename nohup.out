@@ -4878,3 +4878,24 @@
 2018-03-22 14:07:52 WARNING  timed out: mtalk.google.com:5228
 2018-03-22 14:07:52 INFO     connecting mtalk.google.com:5228 from 127.0.0.1:57217
 2018-03-22 14:08:16 WARNING  timed out: abs.twimg.com:443
+2018-03-22 14:09:13 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57305
+2018-03-22 14:09:14 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57307
+2018-03-22 14:09:16 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57310
+2018-03-22 14:09:16 INFO     connecting ussjc-edge.icloud-content.com:443 from 127.0.0.1:57312
+2018-03-22 14:09:16 INFO     connecting ussjc-edge-031.icloud-content.com:443 from 127.0.0.1:57314
+2018-03-22 14:09:17 INFO     connecting us-west-1.blobstore.apple.com:443 from 127.0.0.1:57316
+2018-03-22 14:09:17 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57318
+2018-03-22 14:09:18 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57320
+2018-03-22 14:09:21 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57322
+2018-03-22 14:09:22 INFO     connecting ussjc-edge.icloud-content.com:443 from 127.0.0.1:57325
+2018-03-22 14:09:22 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57327
+2018-03-22 14:09:23 INFO     connecting ussjc-edge-031.icloud-content.com:443 from 127.0.0.1:57329
+2018-03-22 14:09:25 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57332
+2018-03-22 14:09:26 INFO     connecting metrics.icloud.com:443 from 127.0.0.1:57335
+2018-03-22 14:09:27 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57337
+2018-03-22 14:09:28 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57339
+2018-03-22 14:09:29 INFO     connecting uslax-edge.icloud-content.com:443 from 127.0.0.1:57341
+2018-03-22 14:09:29 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57343
+2018-03-22 14:09:30 INFO     connecting gateway.icloud.com:443 from 127.0.0.1:57345
+2018-03-22 14:09:31 INFO     connecting ussjc-edge.icloud-content.com:443 from 127.0.0.1:57347
+2018-03-22 14:09:44 INFO     connecting criea.info:22 from 127.0.0.1:57352
