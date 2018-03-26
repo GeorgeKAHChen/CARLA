@@ -101,7 +101,7 @@ def Algorithm():
 
 	def GetAlpha(i):
 		#This function will get the parameter alpha in the next loop
-		tem = math.erf((Constant.xmax - x[i]) / sigma) - math.erf((Constant.xmin - x[i]) / sigma)
+		tem = math.erf((Constant.xmax - x[i]) / sigma / math.sqrt(2)) - math.erf((Constant.xmin - x[i]) / sigma/ math.sqrt(2))
 		TTL = 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
 		print(tem, TTL)
 		return TTL
