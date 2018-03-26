@@ -102,7 +102,9 @@ def Algorithm():
 	def GetAlpha(i):
 		#This function will get the parameter alpha in the next loop
 		tem = math.erf((Constant.xmax - x[i]) / sigma) - math.erf((Constant.xmin - x[i]) / sigma)
-		return 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
+		TTL = 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
+		print(tem, TTL)
+		return TTL
 
 
 	def GetJmed(i):
@@ -131,7 +133,7 @@ def Algorithm():
 		
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
 		z = random.random()
-		print(z)
+		#print(z)
 		x.append(GetX(z, kase))
 		J.append(Constant.Consume(x[kase]))
 		Jmed = GetJmed(kase)
@@ -152,8 +154,6 @@ def Algorithm():
 
 			SavStr += (str(Jmed) + "\t" + str(maxx) + "\n")
 			#print(SavStr, end = "\r")
-			if kase % 50 == 0 and kase != 0:
-				Init.ArrOutput([y1])
 	
 	#Get the maxinum of PDF
 	x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
