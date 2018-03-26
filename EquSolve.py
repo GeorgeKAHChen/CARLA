@@ -103,7 +103,7 @@ def Algorithm():
 		#This function will get the parameter alpha in the next loop
 		tem = math.erf((Constant.xmax - x[i]) / sigma / math.sqrt(2)) - math.erf((Constant.xmin - x[i]) / sigma/ math.sqrt(2))
 		TTL = 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
-		print(tem, TTL)
+		#print(tem, TTL)
 		return TTL
 
 
@@ -140,7 +140,9 @@ def Algorithm():
 		Jmin = min(Jmin, J[kase])
 		beta.append(GetBeta(kase))
 		alpha.append(GetAlpha(kase))
-		
+
+		print(z, Jmin, Jmed)
+
 		if Constant.MODEL == "TEST" and kase != 0 and kase % 50 == 0:
 			x1 = np.linspace(Constant.xmin, Constant.xmax, 500)
 			maxx = 0
@@ -165,7 +167,7 @@ def Algorithm():
 		if y1 > maxy:
 			maxx = x1[i]
 			maxy = y1
-	#print(str(maxx))
+	print(str(maxx))
 
 
 	#Output and Print
@@ -177,7 +179,7 @@ def Algorithm():
 		pass
 
 	elif Constant.MODEL == "TEST":
-		Init.ArrOutput([alpha, beta, x])
+		Init.ArrOutput([alpha, beta, x, J])
 		FileName = "SavingJmed"
 		Init.BuildFile(FileName)
 		File = open(FileName, "a")
@@ -188,12 +190,12 @@ def Algorithm():
 		Init.ArrOutput([alpha, beta, x])
 		fig1 = plt.figure()
 		ax = fig1.add_subplot(111)
-		plt.xlim(Constant.xmin, Constant.xmax)
+		plt.xlim(Constant.xmin-0.1, Constant.xmax+0.1)
 		plt.ylim(0, 5)
 
 		#print(str(maxx))
 
-		y1 = np.array([0.00 for n in range(500)])
+		y1 = np.array([0.00 for n in range(2000)])
 		for i in range(0, len(y1)):
 			y1[i] = fx(x1[i], Constant.TTLkase - 1, 0)
 		ax.plot(x1, y1, label = "black")
