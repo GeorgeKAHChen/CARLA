@@ -1,7 +1,7 @@
 ############################################################
 #
 #		CARLA - Equation Solve
-#		CopyriConstant.ght(c) KazukiAmakawa, all riConstant.ght reserved.
+#		Copyright(c) KazukiAmakawa, all right reserved.
 #		EquSolve.py
 #
 ############################################################
@@ -93,10 +93,10 @@ def Algorithm():
 
 	def GetBeta(i):
 		#This function will get the parameter beta in the next loop
-		if abs(Jmed - Jmin) < 0.00001:
+		if abs(Jmed - Jmin) < 0.00001 or Jmed - J[i] < 0: 
 			return 0
 		else:
-			return max(0, ((Jmed - J[i]) / (Jmed - Jmin)) )
+			return min(max(0, ((Jmed - J[i]) / (Jmed - Jmin)) ), 1)
 
 
 	def GetAlpha(i):
@@ -126,35 +126,35 @@ def Algorithm():
 	#Main Loop
 	for kase in range(0, Constant.TTLkase):
 		if Constant.MODEL == "PRE" or Constant.MODEL == "TEST":
-			print(str(kase) + "/"  + str(Constant.TTLkase), end = "\r")
+			pass
+			#print(str(kase) + "/"  + str(Constant.TTLkase), end = "\r")
 		
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
 		z = random.random()
+		print(z)
 		x.append(GetX(z, kase))
 		J.append(Constant.Consume(x[kase]))
 		Jmed = GetJmed(kase)
 		Jmin = min(Jmin, J[kase])
-		if (Jmed - J[kase]) <= 0:
-			beta.append(0)
-		else:
-			beta.append(GetBeta(kase))
+		beta.append(GetBeta(kase))
 		alpha.append(GetAlpha(kase))
 		
-		if Constant.MODEL == "TEST":
+		if Constant.MODEL == "TEST" and kase != 0 and kase % 50 == 0:
 			x1 = np.linspace(Constant.xmin, Constant.xmax, 500)
-			FinIntegral = 0
 			maxx = 0
 			maxy = 0
-			if kase != 0:
-				for i in range(1, len(x1)):
-					y1 = fx(x1[i], kase - 1, 0)
-					if y1 > maxy:
-						maxx = x1[i]
-						maxy = y1
+			y1 = [0]
+			for i in range(1, len(x1)):
+				y1 = fx(x1[i], kase - 1, 0)
+				if y1 > maxy:
+					maxx = x1[i]
+					maxy = y1
 
 			SavStr += (str(Jmed) + "\t" + str(maxx) + "\n")
-			print(SavStr, end = "\r")
-
+			#print(SavStr, end = "\r")
+			if kase % 50 == 0 and kase != 0:
+				Init.ArrOutput([y1])
+	
 	#Get the maxinum of PDF
 	x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
 	FinIntegral = 0
@@ -165,7 +165,8 @@ def Algorithm():
 		if y1 > maxy:
 			maxx = x1[i]
 			maxy = y1
-	print(str(maxx))
+	#print(str(maxx))
+
 
 	#Output and Print
 	#You can change the model of output in the file named Constant.py
@@ -176,6 +177,7 @@ def Algorithm():
 		pass
 
 	elif Constant.MODEL == "TEST":
+		Init.ArrOutput([alpha, beta, x])
 		FileName = "SavingJmed"
 		Init.BuildFile(FileName)
 		File = open(FileName, "a")
@@ -189,7 +191,7 @@ def Algorithm():
 		plt.xlim(Constant.xmin, Constant.xmax)
 		plt.ylim(0, 5)
 
-		print(str(maxx))
+		#print(str(maxx))
 
 		y1 = np.array([0.00 for n in range(500)])
 		for i in range(0, len(y1)):
