@@ -18,8 +18,8 @@ DataArr = [[169.2, 63.5], [159.2, 53.1], [168.2, 61.4], [158.8, 52.4], [163.8, 5
 
 #=======================================================
 #Parameters and functions followed are the learning object you can change
-xmin = 0
-xmax = 2
+xmin = 0.5
+xmax = 0.8
 #Interval min and max
 def Consume(x):
 	import math
@@ -30,7 +30,7 @@ def Consume(x):
 	
 #=======================================================
 #Parameters and functions followed are the learning parameter you can change
-TTLkase = 2000
+TTLkase = 5000
 #Loop total case
 gw = 0.02
 gh = 0.30
