@@ -101,7 +101,7 @@ def Algorithm():
 
 	def GetAlpha(i):
 		#This function will get the parameter alpha in the next loop
-		tem = math.erf((Constant.xmax - x[i]) / sigma / math.sqrt(2)) - math.erf((Constant.xmin - x[i]) / sigma/ math.sqrt(2))
+		tem = math.erf((Constant.xmax - x[i]) / (sigma * math.sqrt(2))) - math.erf((Constant.xmin - x[i]) / (sigma * math.sqrt(2)))
 		TTL = 1 / (1 + beta[i+1] * math.sqrt(2 * pi) / 2 * Lambda * sigma * tem)
 		#print(tem, TTL)
 		return TTL
@@ -141,68 +141,31 @@ def Algorithm():
 		beta.append(GetBeta(kase))
 		alpha.append(GetAlpha(kase))
 
-		print(z, Jmin, Jmed)
-
-		if Constant.MODEL == "TEST" and kase != 0 and kase % 50 == 0:
-			x1 = np.linspace(Constant.xmin, Constant.xmax, 500)
+		#print(z, Jmin, Jmed)
+		if kase >= 2:
+			x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
+			FinIntegral = 0
 			maxx = 0
 			maxy = 0
-			y1 = [0]
-			for i in range(1, len(x1)):
-				y1 = fx(x1[i], kase - 1, 0)
-				if y1 > maxy:
+			y1 = np.array([0.00 for n in range(2000)])
+			for i in range(0, len(y1)):
+				y1[i] = fx(x1[i], kase - 1, 0)
+				if y1[i] > maxy:
 					maxx = x1[i]
-					maxy = y1
+					maxy = y1[i]
+			print(str(maxx))
 
-			SavStr += (str(Jmed) + "\t" + str(maxx) + "\n")
-			#print(SavStr, end = "\r")
-	
-	#Get the maxinum of PDF
-	x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
-	FinIntegral = 0
-	maxx = 0
-	maxy = 0
-	for i in range(1, len(x1)):
-		y1 = fx(x1[i], Constant.TTLkase - 1, 0)
-		if y1 > maxy:
-			maxx = x1[i]
-			maxy = y1
-	print(str(maxx))
+			"""
+			fig1 = plt.figure()
+			ax = fig1.add_subplot(111)
+			plt.xlim(Constant.xmin-0.1, Constant.xmax+0.1)
+			plt.ylim(0, 5)
 
+			ax.plot(x1, y1, label = "black")
 
-	#Output and Print
-	#You can change the model of output in the file named Constant.py
-	if Constant.MODEL == "PRE" :
-		pass
-	
-	elif Constant.MODEL == "VPS":
-		pass
-
-	elif Constant.MODEL == "TEST":
-		Init.ArrOutput([alpha, beta, x, J])
-		FileName = "SavingJmed"
-		Init.BuildFile(FileName)
-		File = open(FileName, "a")
-		File.write(SavStr)
-		File.close()
-
-		"""
-		Init.ArrOutput([alpha, beta, x])
-		fig1 = plt.figure()
-		ax = fig1.add_subplot(111)
-		plt.xlim(Constant.xmin-0.1, Constant.xmax+0.1)
-		plt.ylim(0, 5)
-
-		#print(str(maxx))
-
-		y1 = np.array([0.00 for n in range(2000)])
-		for i in range(0, len(y1)):
-			y1[i] = fx(x1[i], Constant.TTLkase - 1, 0)
-		ax.plot(x1, y1, label = "black")
-
-		fig1.show()
-		input("Press any key to continue")
-		"""
+			fig1.show()
+			input("Press any key to continue")
+			"""
 
 	return None
 	
