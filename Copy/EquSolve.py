@@ -134,7 +134,7 @@ def Algorithm():
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
 		z = random.random()
 		#print(z)
-		x.append(z)
+		x.append(GetX(z, kase))
 		J.append(Constant.Consume(x[kase]))
 		Jmed = GetJmed(kase)
 		Jmin = min(Jmin, J[kase])
@@ -142,7 +142,7 @@ def Algorithm():
 		alpha.append(GetAlpha(kase))
 
 		#print(z, Jmin, Jmed)
-		if kase >= 2 and kase % 100 == 0:
+		if kase >= 2:
 			x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
 			FinIntegral = 0
 			maxx = 0
@@ -165,7 +165,7 @@ def Algorithm():
 
 			fig1.show()
 			input("Press any key to continue")
-			"""			
+			"""
 
 	return None
 	
