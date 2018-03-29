@@ -117,27 +117,9 @@ class CARLA(object):
 
 				fig1.show()
 				input("Press any key to continue")
-				
+		
+		if self.MODEL == "-t":
+			print (RetVar)
+
 		return RetVar
 		
-
-
-class Equation(CARLA):
-	def Consume(self, ImaGourp):
-		import math
-		return abs(pow(math.e, ImaGourp[0]) - 2)
-
-Equ = Equation([[2, 0]], "-t", 1000, 0.002, 0.03)
-Solution = Equ.Algorithm()
-print(Solution)
-
-
-
-
-
-
-
-
-
-
-			
