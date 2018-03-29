@@ -7,7 +7,7 @@
 ############################################################
 
 class CARLA(object):
-	def __init__(self, Interval, MODEL = "-t", TTLkase = 1000, gw = 0.002, gh = 0.03):
+	def __init__(self, Interval, MODEL = "-t", TTLkase = 1000, gw = 0.002, gh = 0.03, Other = []):
 		self.MODEL = MODEL
 
 		self.TTLkase = TTLkase
@@ -19,8 +19,9 @@ class CARLA(object):
 		self.Interval = Interval
 		self.NumVar = len(Interval)
 
+		self.Other = Other
 
-	def Consume(self, ImaGourp):
+	def Consume(self, ImaGroup):
 		return None
 
 
@@ -83,8 +84,13 @@ class CARLA(object):
 			for var in range(0, self.NumVar):
 				x[var].append(random.random())
 				ImaCons = [0.00 for n in range(self.NumVar)]
+				
 				for ttl in range(0, len(ImaCons)):
-					ImaCons[ttl] = x[ttl][len(x[ttl]) - 1]
+					if len(x[ttl]) == 0:
+						ImaCons[ttl] = (self.Interval[ttl][1] + self.Interval[ttl][0]) / 2
+					else:
+						ImaCons[ttl] = x[ttl][len(x[ttl]) - 1]
+
 				J[var].append(self.Consume(ImaCons))
 				Jmed[var] = GetJmed(kase, var)
 				Jmin[var] = min(Jmin[var], J[var][kase])
