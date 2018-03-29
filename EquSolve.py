@@ -11,7 +11,6 @@
 import math
 import random
 import numpy as np
-#import matplotlib.pyplot as plt
 from copy import deepcopy
 
 
@@ -129,7 +128,7 @@ def Algorithm():
 	for kase in range(0, Constant.TTLkase):
 		if Constant.MODEL == "PRE" or Constant.MODEL == "TEST":
 			pass
-			#print(str(kase) + "/"  + str(Constant.TTLkase), end = "\r")
+			print(str(kase) + "/"  + str(Constant.TTLkase), end = "\r")
 		
 		#Order: z_i, x_i, J_i(J_{med}, J_{min}), \beta_{i+1}, \alpha_{i+1}, f(\tau, i+1)
 		z = random.random()
@@ -142,37 +141,38 @@ def Algorithm():
 		alpha.append(GetAlpha(kase))
 
 		#print(z, Jmin, Jmed)
-		if kase >= 2 and kase % 100 == 0:
-			x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
-			FinIntegral = 0
-			maxx = 0
-			maxy = 0
-			y1 = np.array([0.00 for n in range(2000)])
-			for i in range(0, len(y1)):
-				y1[i] = fx(x1[i], kase - 1, 0)
-				if y1[i] > maxy:
-					maxx = x1[i]
-					maxy = y1[i]
-			print(str(maxx))
+		#if kase >= 2 and kase % 100 == 0:
+	x1 = np.linspace(Constant.xmin, Constant.xmax, 2000)
+	FinIntegral = 0
+	maxx = 0
+	maxy = 0
+	y1 = np.array([0.00 for n in range(2000)])
+	for i in range(0, len(y1)):
+		y1[i] = fx(x1[i], kase - 1, 0)
+		if y1[i] > maxy:
+			maxx = x1[i]
+			maxy = y1[i]
+	print(str(maxx))
 
-			"""
-			fig1 = plt.figure()
-			ax = fig1.add_subplot(111)
-			plt.xlim(Constant.xmin-0.1, Constant.xmax+0.1)
-			plt.ylim(0, 5)
+	"""
+	import matplotlib.pyplot as plt
+	fig1 = plt.figure()
+	ax = fig1.add_subplot(111)
+	plt.xlim(Constant.xmin-0.1, Constant.xmax+0.1)
+	plt.ylim(0, 5)
 
-			ax.plot(x1, y1, label = "black")
+	ax.plot(x1, y1, label = "black")
 
-			fig1.show()
-			input("Press any key to continue")
-			"""			
-
+	fig1.show()
+	input("Press any key to continue")
+	
+	"""
 	return None
 	
 
 
-#for i in range(0, 100):
-Algorithm()
+for i in range(0, 100):
+	Algorithm()
 
 
 
