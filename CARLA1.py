@@ -11,6 +11,7 @@ class CARLA(object):
 		self.MODEL = MODEL
 
 		self.TTLkase = TTLkase
+		self.LoopMax = 500
 
 		self.gw = gw
 		self.gh = gh
@@ -48,50 +49,6 @@ class CARLA(object):
 
 		SavStr = ""
 
-		
-		def F(delta, i, var):
-			#This function will calculate the value of f(delta, i)
-			TTL = 0
-			for Loop in range(0, i):
-				if Loop == 0:
-					TTL =  (delta - self.Interval[var][1]) / (self.Interval[var][0] - self.Interval[var][1])
-				else:
-					tem = math.erf((delta - x[var][Loop-1]) / sigma[var]) - math.erf((self.Interval[var][1] - x[var][Loop-1]) / sigma[var])
-					TTL += alpha[var][Loop] * ( TTL + math.sqrt(2 * pi) / 2 * alpha[var][Loop] * beta[var][Loop] * Lambda[var] * sigma[var] * tem )
-			return TTL
-
-
-		def dF(delta, i, var):
-			#This function will calculate the value of F'_x(delta, i)
-			TTL = 0
-			for Loop in range(0, i):
-				if Loop == 0:
-					TTL = 1 / (self.Interval[var][0] - self.Interval[var][1])
-				else:
-					TTL += alpha[var][Loop] * ( TTL + math.sqrt(2) * alpha[var][Loop] * beta[var][Loop] * Lambda[var] * sigma[var] * math.exp(- pow((delta - x[var][Loop-1]) / sigma[var], 2 )) )
-			return TTL
-
-
-		def GetX(z, i, var, xinit = (self.Interval[var][1] + self.Interval[var][0]) / 2):
-			#This function will get the value x in the integral with variable upper
-			if i == 0:
-				return self.Interval[var][1] + z * (self.Interval[var][0] - self.Interval[var][1])
-			else:
-				#Use Newton's method to iterator
-				RemDelta = 0.00
-				delta = xinit
-				for NTKase in range(0, 1000):
-					FX = F(delta, i, var)
-					dFX = dF(delta, i, var)
-					delta = delta - (FX - z) / dFX
-					
-					if abs(RemDelta - delta) < 0.01:
-						break
-
-					RemDelta = delta
-				print(z, delta, FX, dFX)
-				return delta
-		
 
 		def GetBeta(i, var):
 			if abs(Jmed[var] - Jmin[var]) < 0.00001 or Jmed[var] - J[var][i] < 0: 
@@ -114,25 +71,20 @@ class CARLA(object):
 				return (Arr[i//2] + Arr[(i+1)//2]) / 2
 
 
-		def fx(tau, i, var):
+		def fx(tau, kase, Loop, var):
 			TTL = 0
-			for Loop in range(0, i):
-				if Loop == 0:
-					TTL = 1 / (self.Interval[var][0] - self.Interval[var][1])
+			for i in range(0, kase):
+				if kase == 0:
+					TTL += 1/(self.Interval[var][0] - self.Interval[var][1])
 				else:
-					tem = math.exp( - (pow((tau - x[var][Loop-1]), 2) / (2 * sigma[var] * sigma[var]) ) )
-					#print(tem)
-					TTL = alpha[var][Loop] * ( TTL + beta[var][Loop] * Lambda[var] * tem )
-
+					TTL = alpha[var][i] * (TTL + Lambda[var] * beta[var][i] * math.exp(-pow((tau - x[var][i-1]), 2) / (2 * sigma[var] * sigma[var])))
 			return TTL
 
-		
 		for kase in range(0, self.TTLkase):
 			if self.MODEL == "-p" or self.MODEL == "-t":
 				print(str(kase) + "/"  + str(self.TTLkase), end = "\r")
 			for var in range(0, self.NumVar):
-				z = random.random()
-				x[var].append(GetX(z, kase, var))
+				x[var].append(random.random() * (self.Interval[var][0] - self.Interval[var][1]) + self.Interval[var][1])
 				ImaCons = [0.00 for n in range(self.NumVar)]
 				
 				for ttl in range(0, len(ImaCons)):
@@ -146,8 +98,7 @@ class CARLA(object):
 				Jmin[var] = min(Jmin[var], J[var][kase])
 				beta[var].append(GetBeta(kase, var))
 				alpha[var].append(GetAlpha(kase, var))
-			
-		#begin of output
+
 		RetVar = []
 		for var in range(0, self.NumVar):
 			import numpy as np
@@ -155,13 +106,12 @@ class CARLA(object):
 			FinIntegral = 0
 			maxx = 0
 			maxy = 0
-			y1 = np.array([1/2 for n in range(2000)])
-			if kase >= 1:
-				for i in range(0, len(y1)):
-					y1[i] = fx(x1[i], kase - 1, var)
-					if y1[i] > maxy:
-						maxx = x1[i]
-						maxy = y1[i]
+			y1 = np.array([0.00 for n in range(2000)])
+			for i in range(0, len(y1)):
+				y1[i] = fx(x1[i], kase - 1, 0, var)
+				if y1[i] > maxy:
+					maxx = x1[i]
+					maxy = y1[i]
 			RetVar.append(maxx)
 
 			if self.MODEL == "-p":
@@ -169,7 +119,7 @@ class CARLA(object):
 				fig1 = plt.figure()
 				ax = fig1.add_subplot(111)
 				plt.xlim(self.Interval[var][1]-0.1, self.Interval[var][0]+0.1)
-				plt.ylim(0, 1)
+				plt.ylim(0, 5)
 
 				ax.plot(x1, y1, label = "black")
 
@@ -178,8 +128,6 @@ class CARLA(object):
 		
 		if self.MODEL == "-t":
 			print (RetVar)
-		#end of output
-
 
 		return RetVar
 	
@@ -190,6 +138,6 @@ class Equation(CARLA):
 		return abs(pow(math.e, ImaGourp[0])- 2)
 
 
-Equ = Equation([[2, 0]], "-p", 100, 0.2, 0.3)
+Equ = Equation([[2, 0]], "-p", 2000, 0.2, 3)
 Solution = Equ.Algorithm()
 print(Solution)	

@@ -61,9 +61,9 @@ def MainFunction():
 		Interval.append([1/ZCNumber, 0])
 		Interval.append([128, 0]) 
 		Interval.append([255, 0])
-	print(Interval)
+	#print(Interval)
 
-	CARLA_Image_Learning = CARLA_Image(Interval, "-p", 200, 0.2, 0.03, Histogram)
+	CARLA_Image_Learning = CARLA_Image(Interval, "-a", 200, 2, 0.3, Histogram)
 
 	Solution = CARLA_Image_Learning.Algorithm()
 
