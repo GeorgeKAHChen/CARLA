@@ -29,6 +29,8 @@ class CARLA(object):
 		import random
 		from copy import deepcopy
 
+		import Init
+
 		e = math.e
 		pi = math.pi
 		x = [[] for n in range (self.NumVar)]	
@@ -48,27 +50,44 @@ class CARLA(object):
 
 		SavStr = ""
 
-		
-		def F(delta, i, var):
-			#This function will calculate the value of f(delta, i)
+
+		def fx(tau, i, var):
 			TTL = 0
 			for Loop in range(0, i):
 				if Loop == 0:
-					TTL =  (delta - self.Interval[var][1]) / (self.Interval[var][0] - self.Interval[var][1])
+					TTL = 1 / (self.Interval[var][0] - self.Interval[var][1])
 				else:
-					tem = math.erf((delta - x[var][Loop-1]) / sigma[var]) - math.erf((self.Interval[var][1] - x[var][Loop-1]) / sigma[var])
-					TTL += alpha[var][Loop] * ( TTL + math.sqrt(2 * pi) / 2 * alpha[var][Loop] * beta[var][Loop] * Lambda[var] * sigma[var] * tem )
+					tem = math.exp( - (pow((tau - x[var][Loop-1]), 2) / (2 * sigma[var] * sigma[var]) ) )
+					#print(tem)
+					TTL = alpha[var][Loop] * ( TTL + beta[var][Loop] * Lambda[var] * tem )
+
+			return TTL
+
+
+		def F(delta, i, var):
+			#This function will calculate the value of f(delta, i)
+			TTL = 0
+			for Loop in range(0, i + 1):
+				if Loop == 0:
+					TTL = (delta - self.Interval[var][1]) / (self.Interval[var][0] - self.Interval[var][1])
+				else:
+					tem = math.erf((delta - x[var][Loop-1]) / (math.sqrt(2) * sigma[var])) - math.erf((self.Interval[var][1] - x[var][Loop-1]) / (math.sqrt(2) * sigma[var]))
+					if delta == 2:
+						print(tem)
+					TTL += alpha[var][Loop] * ( TTL + math.sqrt(2 * pi) / 2 * beta[var][Loop] * Lambda[var] * sigma[var] * tem )
+			if delta == 2:
+				print(TTL)
 			return TTL
 
 
 		def dF(delta, i, var):
 			#This function will calculate the value of F'_x(delta, i)
 			TTL = 0
-			for Loop in range(0, i):
+			for Loop in range(0, i + 1):
 				if Loop == 0:
 					TTL = 1 / (self.Interval[var][0] - self.Interval[var][1])
 				else:
-					TTL += alpha[var][Loop] * ( TTL + math.sqrt(2) * alpha[var][Loop] * beta[var][Loop] * Lambda[var] * sigma[var] * math.exp(- pow((delta - x[var][Loop-1]) / sigma[var], 2 )) )
+					TTL += alpha[var][Loop] * ( TTL + math.sqrt(pi) / 2 * beta[var][Loop] * Lambda[var] * sigma[var] * math.exp(- pow((delta - x[var][Loop-1]), 2 ) / (2 * sigma[var] * sigma[var]) ) )
 			return TTL
 
 
@@ -84,12 +103,15 @@ class CARLA(object):
 					FX = F(delta, i, var)
 					dFX = dF(delta, i, var)
 					delta = delta - (FX - z) / dFX
-					
-					if abs(RemDelta - delta) < 0.01:
+					print(delta)
+					#print(RemDelta, delta, FX, dFX, end = "")
+					#input()
+					if abs(RemDelta - delta) < 0.000000001:
 						break
 
 					RemDelta = delta
-				print(z, delta, FX, dFX)
+				#print(delta, end = "\t")
+				
 				return delta
 		
 
@@ -101,7 +123,7 @@ class CARLA(object):
 
 
 		def GetAlpha(i, var):
-			tem = math.erf((self.Interval[var][0] - x[var][i]) / (sigma[var] * math.sqrt(2))) - math.erf((self.Interval[var][1] - x[var][i]) / (sigma[var] * math.sqrt(2)))
+			tem = math.erf( (self.Interval[var][0] - x[var][i]) / (sigma[var] * math.sqrt(2)) ) - math.erf( (self.Interval[var][1] - x[var][i]) / (sigma[var] * math.sqrt(2)) )
 			return 1 / (1 + beta[var][i+1] * math.sqrt(2 * pi) / 2 * Lambda[var] * sigma[var] * tem)
 
 
@@ -113,26 +135,15 @@ class CARLA(object):
 			else:
 				return (Arr[i//2] + Arr[(i+1)//2]) / 2
 
-
-		def fx(tau, i, var):
-			TTL = 0
-			for Loop in range(0, i):
-				if Loop == 0:
-					TTL = 1 / (self.Interval[var][0] - self.Interval[var][1])
-				else:
-					tem = math.exp( - (pow((tau - x[var][Loop-1]), 2) / (2 * sigma[var] * sigma[var]) ) )
-					#print(tem)
-					TTL = alpha[var][Loop] * ( TTL + beta[var][Loop] * Lambda[var] * tem )
-
-			return TTL
-
 		
 		for kase in range(0, self.TTLkase):
 			if self.MODEL == "-p" or self.MODEL == "-t":
-				print(str(kase) + "/"  + str(self.TTLkase), end = "\r")
+				pass
+				#print(str(kase) + "/"  + str(self.TTLkase), end = "\r")
 			for var in range(0, self.NumVar):
 				z = random.random()
 				x[var].append(GetX(z, kase, var))
+
 				ImaCons = [0.00 for n in range(self.NumVar)]
 				
 				for ttl in range(0, len(ImaCons)):
@@ -146,39 +157,45 @@ class CARLA(object):
 				Jmin[var] = min(Jmin[var], J[var][kase])
 				beta[var].append(GetBeta(kase, var))
 				alpha[var].append(GetAlpha(kase, var))
-			
-		#begin of output
-		RetVar = []
-		for var in range(0, self.NumVar):
-			import numpy as np
-			x1 = np.linspace(self.Interval[0][0], self.Interval[0][1], 2000)
-			FinIntegral = 0
-			maxx = 0
-			maxy = 0
-			y1 = np.array([1/2 for n in range(2000)])
-			if kase >= 1:
-				for i in range(0, len(y1)):
-					y1[i] = fx(x1[i], kase - 1, var)
-					if y1[i] > maxy:
-						maxx = x1[i]
-						maxy = y1[i]
-			RetVar.append(maxx)
+				
+				F(2, kase, var)
+				#print(z, x[var][kase], J[var][kase], Jmed[var], Jmin[var], beta[var][kase], alpha[var][kase])
+				#print(z)
+				print(Jmed[var], Jmin[var], J[var][kase], beta[var][kase+1])
+				input()
+			#begin of output============================================
+			RetVar = []
+			for var in range(0, self.NumVar):
+				import numpy as np
+				x1 = np.linspace(self.Interval[0][0], self.Interval[0][1], 2000)
+				FinIntegral = 0
+				maxx = 0
+				maxy = 0
+				y1 = np.array([1/2 for n in range(2000)])
+				if kase >= 1:
+					for i in range(0, len(y1)):
+						y1[i] = fx(x1[i], kase - 1, var)
+						if y1[i] > maxy:
+							maxx = x1[i]
+							maxy = y1[i]
+				RetVar.append(maxx)
 
-			if self.MODEL == "-p":
-				import matplotlib.pyplot as plt
-				fig1 = plt.figure()
-				ax = fig1.add_subplot(111)
-				plt.xlim(self.Interval[var][1]-0.1, self.Interval[var][0]+0.1)
-				plt.ylim(0, 1)
+				if self.MODEL == "-p" and (kase % 50 == 0 or kase <= 10):
+					import matplotlib.pyplot as plt
+					fig1 = plt.figure()
+					ax = fig1.add_subplot(111)
+					plt.xlim(self.Interval[var][1]-0.1, self.Interval[var][0]+0.1)
+					plt.ylim(0, 3)
 
-				ax.plot(x1, y1, label = "black")
+					ax.plot(x1, y1, label = "black")
 
-				fig1.show()
-				input("Press any key to continue")
-		
-		if self.MODEL == "-t":
-			print (RetVar)
-		#end of output
+					#fig1.show()
+					#input("Press any key to continue")
+					plt.savefig('Saving/Figure' + str(Init.GetTime()) + '.png')
+
+			if self.MODEL == "-t":
+				print (RetVar)
+			#end of output============================================
 
 
 		return RetVar
@@ -190,6 +207,6 @@ class Equation(CARLA):
 		return abs(pow(math.e, ImaGourp[0])- 2)
 
 
-Equ = Equation([[2, 0]], "-p", 100, 0.2, 0.3)
+Equ = Equation([[2, 0]], "-p", 500, 0.2, 0.3)
 Solution = Equ.Algorithm()
 print(Solution)	
