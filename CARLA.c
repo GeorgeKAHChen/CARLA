@@ -140,15 +140,18 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 
 	//Pretreatment, Calculate lambda and sigma
-	for(int i = 0; i < var; i ++){
+	int i;
+	for(i = 0; i < var; i ++){
 		lambda[i] = gw / (Interval[i][1] - Interval[i][0]);
 		sigma[i] = gh * (Interval[i][1] - Interval[i][0]); 
 	}
 
 
 	//Main Loop
-	for(int kase = 0; kase < ttl; kase ++){
-		for(int par = 0; par < var; par ++){
+	int kase;
+	for(kase = 0; kase < ttl; kase ++){
+		int par;
+		for(par = 0; par < var; par ++){
 		/*
 			==========Get the random number z, which is the PDF integral value==========
 		*/
@@ -166,10 +169,12 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			double Remdelta = 0;
 
 			//Main Loop
-			for(int loop = 0; loop < 1000; loop ++){
+			int loop;
+			for(loop = 0; loop < 1000; loop ++){
 				//Integral function(Original function) integral
 				double Fx = (delta - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
-				for(int k = 1; k <= kase; k ++){
+				int k;
+				for(k = 1; k <= kase; k ++){
 					tem = erf( (delta - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
 					tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 					Fx = alpha[par][k] * (Fx + tem);
@@ -177,7 +182,8 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 				//Normal function(Partial function) integral
 				double dFx = 1 / (Interval[par][1] - Interval[par][0]);
-				for(int k = 1; k <= kase; k ++){
+				int k;
+				for(k = 1; k <= kase; k ++){
 					tem = exp(- pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par]) );
 					tem = beta[par][k] * lambda[par] * sqrt(pi) / 2 * tem;
 					dFx = alpha[par][k] * (dFx + tem);
@@ -200,7 +206,8 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 			//Get the parameter group at present.
 			double Parameter[var];
-			for(int loop = 0; loop < var; loop ++){
+			int loop;
+			for(loop = 0; loop < var; loop ++){
 				if (loop <= par){
 					Parameter[loop] = x[loop][kase];
 				}
@@ -262,11 +269,12 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 				double Output = 0;
 				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 
-				for(int ima = 0; ima < InteSize; ima ++){
+				int ima;
+				for(ima = 0; ima < InteSize; ima ++){
 					double delta = (double)ima / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
 					double total = (double)1 / (Interval[par][1] - Interval[par][0]);
-
-					for(int k = 0; k <= kase; k ++){
+					int k;
+					for(k = 0; k <= kase; k ++){
 						tem = beta[par][k + 1] * lambda[par] * exp( - pow((delta - x[par][k]), 2) / (2 * sigma[par] * sigma[par])  );
 						total = alpha[par][k + 1] * (total + tem);
 					}
@@ -283,16 +291,16 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 	//Judgement, calculate the exception of PDF, and make a decision
 	//freopen("After", "w", stdout);
-	
-	for(int par = 0; par < var; par ++){
+	int par;
+	for(par = 0; par < var; par ++){
 		double Output = 0;
 		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
-
-		for(int kase = 0; kase < InteSize; kase ++){
+		int kase;
+		for(kase = 0; kase < InteSize; kase ++){
 			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
 			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
-
-			for(int k = 0; k <= ttl; k ++){
+			int k;
+			for(k = 0; k <= ttl; k ++){
 				tem = beta[par][k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
 				total = alpha[par][k] * (total + tem);
 			}
@@ -325,8 +333,7 @@ int main(int argc, char const *argv[]){
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
 
-	for(int i = 0; i < 20; i ++)
-		Algorithm(1, 2000, 0.01, 0.03, 'w', Interval);
+	Algorithm(1, 10000, 0.01, 0.03, 'w', Interval);
 	return 0;
 }
 
