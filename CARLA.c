@@ -47,11 +47,50 @@ double Random(int seed){
 }
 
 
-int compare(const void *a, const void *b){  
-   return *(double *)a - *(double *)b;   
-}  
+
+typedef struct _Range {
+	int start, end;
+} Range;
+Range new_Range(int s, int e) {
+	Range r;
+	r.start = s;
+	r.end = e;
+	return r;
+}
+void swap(double *x, double *y) {
+	double t = *x;
+	*x = *y;
+	*y = t;
+}
 
 
+double quick_sort(const int len, double arr[len]) {
+	Range r[len];
+	int p = 0;
+	r[p++] = new_Range(0, len - 1);
+	while (p) {
+		Range range = r[--p];
+		if (range.start >= range.end)
+			continue;
+		double mid = arr[range.end];
+		int left = range.start, right = range.end - 1;
+		while (left < right) {
+			while (arr[left] < mid && left < right)
+				left ++;
+			while (arr[right] >= mid && left < right)
+				right --;
+			swap(&arr[left], &arr[right]);
+		}
+		if (arr[left] >= arr[range.end])
+			swap(&arr[left], &arr[range.end]);
+		else
+			left++;
+		r[p++] = new_Range(range.start, left - 1);
+		r[p++] = new_Range(left + 1, range.end);
+	}
+
+	return arr[(int)(len/2)];
+}
 
 
 void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
@@ -100,6 +139,7 @@ void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
 			==========Get the random number z, which is the PDF integral value==========
 		*/
 			//STILL HAVE SOME ERROR
+			//I will recovery this bug latter, with the Mersenne Twister algorithm
 			z = Random(seed);
 			seed = (int)(z * 100);
 
@@ -163,12 +203,10 @@ void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
 		*/
 			//Calculation of Jmed
 			//Definition and Initialization
-			double TemJ[kase];
+			double TemJ[kase + 1];
 			memcpy(TemJ, J[par], sizeof(TemJ));
-			
-			//STILL HAVE SOME ERROR
-			qsort(TemJ , kase, sizeof(double), compare);  
-			Jmed[par] = TemJ[(int)(kase / 2)];
+
+			Jmed[par] = quick_sort(kase + 1, TemJ);
 
 
 			//Calculation of Jmin
@@ -239,7 +277,7 @@ int main(int argc, char const *argv[]){
 
 	return 0;
 */
-	freopen("SaveArr", "w", stdout);
+	//freopen("SaveArr", "w", stdout);
 	//Interval definition
 	double Interval[1][2];
 	Interval[0][0] = 0;
