@@ -1,5 +1,5 @@
 clear;
-Length = 3000;
+Length = 2000;
 InteSize = 200;
 IntervalMin = 0;
 IntervalMax = 2;

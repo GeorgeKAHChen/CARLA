@@ -257,6 +257,8 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 				printf("%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
 
 			if (command == 'p'){
+				printf("sb:\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+
 				double Output = 0;
 				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 
@@ -323,8 +325,8 @@ int main(int argc, char const *argv[]){
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
 
-
-	Algorithm(1, 10000, 0.01, 0.05, 't', Interval);
+	for(int i = 0; i < 20; i ++)
+		Algorithm(1, 2000, 0.01, 0.03, 'w', Interval);
 	return 0;
 }
 
