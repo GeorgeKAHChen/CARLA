@@ -182,7 +182,6 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 				//Normal function(Partial function) integral
 				double dFx = 1 / (Interval[par][1] - Interval[par][0]);
-				int k;
 				for(k = 1; k <= kase; k ++){
 					tem = exp(- pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par]) );
 					tem = beta[par][k] * lambda[par] * sqrt(pi) / 2 * tem;
@@ -206,7 +205,6 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 			//Get the parameter group at present.
 			double Parameter[var];
-			int loop;
 			for(loop = 0; loop < var; loop ++){
 				if (loop <= par){
 					Parameter[loop] = x[loop][kase];
