@@ -158,11 +158,11 @@ class CARLA(object):
 				beta[var].append(GetBeta(kase, var))
 				alpha[var].append(GetAlpha(kase, var))
 				
-				F(2, kase, var)
+				#F(2, kase, var)
 				#print(z, x[var][kase], J[var][kase], Jmed[var], Jmin[var], beta[var][kase], alpha[var][kase])
 				#print(z)
-				print(Jmed[var], Jmin[var], J[var][kase], beta[var][kase+1])
-				input()
+				#print(Jmed[var], Jmin[var], J[var][kase], beta[var][kase+1])
+				#input()
 			#begin of output============================================
 			RetVar = []
 			for var in range(0, self.NumVar):
@@ -179,6 +179,10 @@ class CARLA(object):
 							maxx = x1[i]
 							maxy = y1[i]
 				RetVar.append(maxx)
+
+				File = open("SavingArr2333", "a")
+				print(y1, file = File)
+				File.close()
 
 				if self.MODEL == "-p" and (kase % 50 == 0 or kase <= 10):
 					import matplotlib.pyplot as plt

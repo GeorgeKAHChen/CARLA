@@ -13,12 +13,11 @@
 #include <time.h>
 
 
-
 const double pi = 3.141592653589793;
 const double e = 2.718281828459045;
-const int InteSize = 2000;
+const int InteSize = 200;
 double Cost(int var, double Parameter[var]);
-
+int sb;								//For test
 
 /*===================DO NOT CHANGE ANYTHING BELOW===================*/
 
@@ -47,7 +46,9 @@ double Random(int seed){
 }
 
 
-
+/*
+Here is a struct using for quick sort
+*/
 typedef struct _Range {
 	int start, end;
 } Range;
@@ -65,6 +66,16 @@ void swap(double *x, double *y) {
 
 
 double quick_sort(const int len, double arr[len]) {
+/*	
+	//Function Instruction:
+	This function will satisfied the quick sort algorithm.
+
+	//Parameter Instruction:
+	const int len = Length of the sort array
+	double arr[len] = Array you want to sort
+
+	return medium value of all array;
+*/
 	Range r[len];
 	int p = 0;
 	r[p++] = new_Range(0, len - 1);
@@ -93,21 +104,24 @@ double quick_sort(const int len, double arr[len]) {
 }
 
 
-void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
+void Algorithm(const int var, const int ttl, const double gw, const double gh, const char command, double Interval[var][2]){
 /*	
 	//Function Instruction:
 	This function is main function of CARLA Method.
 
 	//Parameter Instruction:
-	int var = Total parameter will learning;
-	int ttl = Total iterator loop during the learning ;
-	double gw = Parameter gw of CARLA method;
-	double gh = Parameter gh of CARLA method;
+	const int var = Total parameter will learning;
+	const int ttl = Total iterator loop during the learning ;
+	const double gw = Parameter gw of CARLA method;
+	const double gh = Parameter gh of CARLA method;
+	const char command = 
+		"p" means this algorithm is using for presentation, it will calculate all PDF value
+		"t" means this algorithm is using for test, it will print some test parameter
+		"w" means this algorithm is using for working, it will output only main result
 	Interval[var][2] = [[X1Min, X1Max], ... ,[XnMin, XnMax]] where n = var;
 
 	return Learning result array;
 */
-
 
 	//Saving Definition
 	double x[var][ttl];					//To save all decision point
@@ -141,7 +155,7 @@ void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
 			//STILL HAVE SOME ERROR
 			//I will recovery this bug latter, with the Mersenne Twister algorithm
 			z = Random(seed);
-			seed = (int)(z * 100);
+			seed = (int)(z * 1000000);
 
 		/*
 			========================Newton's Method, get x========================
@@ -234,7 +248,34 @@ void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
 			tem = beta[par][kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 			alpha[par][kase + 1] = 1 / (1 + tem);
 			
-			printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t\n", z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+
+		/*
+			===============Tem output and confident if the algorithm is right our not===============
+		*/
+
+			if (command == 't')
+				printf("%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+
+			if (command == 'p'){
+				double Output = 0;
+				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
+
+				for(int ima = 0; ima < InteSize; ima ++){
+					double delta = (double)ima / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
+					double total = (double)1 / (Interval[par][1] - Interval[par][0]);
+
+					for(int k = 0; k <= kase; k ++){
+						tem = beta[par][k + 1] * lambda[par] * exp( - pow((delta - x[par][k]), 2) / (2 * sigma[par] * sigma[par])  );
+						total = alpha[par][k + 1] * (total + tem);
+					}
+					Output = (double)total;
+					printf("%0.16f\t", Output);
+					Output = 0;
+				}
+				printf("\n");
+
+			}
+
 		}
 	}
 
@@ -243,23 +284,21 @@ void Algorithm(int var, int ttl, double gw, double gh, double Interval[var][2]){
 	
 	for(int par = 0; par < var; par ++){
 		double Output = 0;
-		double LenIntervar = 1 / InteSize * (Interval[par][1] - Interval[par][0]);
-		
+		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
+
 		for(int kase = 0; kase < InteSize; kase ++){
-			double delta = kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];	
-			double total = 1 / (Interval[par][1] - Interval[par][0]);
-			for(int k = 1; k < ttl; k ++){
+			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
+			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
+
+			for(int k = 0; k <= ttl; k ++){
 				tem = beta[par][k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
 				total = alpha[par][k] * (total + tem);
 			}
-			Output += total * LenIntervar;
-			printf("%f\t%f\t\t", total, Output);
+			Output += (double)delta * total * LenIntervar;
 		}
-		
-		printf("%f\n", Output);
+		printf("%0.16f\n", Output);
+
 	}
-
-
 	return ;
 }
 
@@ -277,14 +316,15 @@ int main(int argc, char const *argv[]){
 
 	return 0;
 */
-	//freopen("SaveArr", "w", stdout);
 	//Interval definition
+	freopen("SaveArr", "w", stdout);
+
 	double Interval[1][2];
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
 
 
-	Algorithm(1, 1000, 0.2, 0.3, Interval);
+	Algorithm(1, 10000, 0.01, 0.05, 't', Interval);
 	return 0;
 }
 
