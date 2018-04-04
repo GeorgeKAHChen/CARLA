@@ -38,7 +38,8 @@ double Random(int seed){
 	srand(seed);
 
 	//Main Loop, get random number
-	for(int i = 0; i < 10; i ++)
+	int i
+	for(i = 0; i < 10; i ++)
 		num = (double)rand()/RAND_MAX;
 	
 	//Output and return
