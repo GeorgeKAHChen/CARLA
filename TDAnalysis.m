@@ -1,6 +1,6 @@
 clear;
-Length = 2000;
-InteSize = 200;
+Length = 10000;
+InteSize = 501;
 IntervalMin = 0;
 IntervalMax = 2;
 x = (1: Length);

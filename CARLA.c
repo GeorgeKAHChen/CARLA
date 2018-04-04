@@ -15,7 +15,8 @@
 
 const double pi = 3.141592653589793;
 const double e = 2.718281828459045;
-const int InteSize = 200;
+const int InteSize = 500;
+const int SizeOfR = 500;
 double Cost(int var, double Parameter[var]);
 int sb;								//For test
 
@@ -223,11 +224,14 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		*/
 			//Calculation of Jmed
 			//Definition and Initialization
-			double TemJ[kase + 1];
-			memcpy(TemJ, J[par], sizeof(TemJ));
-
+			int TemSize;
+			if (sizeof(J) / sizeof(double) <= SizeOfR)		TemSize = kase + 1;
+			else											TemSize = 501;
+			
+			double TemJ[TemSize];
+			memcpy(TemJ, J[par] + TemSize - 1, sizeof(TemJ));
 			Jmed[par] = quick_sort(kase + 1, TemJ);
-
+			//ここのコードは多分問題があるますが、その後で調べてください。
 
 			//Calculation of Jmin
 			if (kase == 0)		
@@ -269,7 +273,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 
 				int ima;
-				for(ima = 0; ima < InteSize; ima ++){
+				for(ima = 0; ima <= InteSize; ima ++){
 					double delta = (double)ima / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
 					double total = (double)1 / (Interval[par][1] - Interval[par][0]);
 					int k;
@@ -295,15 +299,16 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		double Output = 0;
 		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 		int kase;
-		for(kase = 0; kase < InteSize; kase ++){
+		for(kase = 0; kase <= InteSize; kase ++){
 			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
 			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
 			int k;
-			for(k = 0; k <= ttl; k ++){
+			for(k = 1; k <= ttl; k ++){
 				tem = beta[par][k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
 				total = alpha[par][k] * (total + tem);
 			}
-			Output += (double)delta * total * LenIntervar;
+			Output += (double)total * LenIntervar * delta;
+			
 		}
 		printf("%0.16f\n", Output);
 
@@ -326,13 +331,14 @@ int main(int argc, char const *argv[]){
 	return 0;
 */
 	//Interval definition
-	freopen("SaveArr", "w", stdout);
+	//freopen("SaveArr", "w", stdout);
 
 	double Interval[1][2];
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
-
-	Algorithm(1, 10000, 0.01, 0.03, 'w', Interval);
+	//int i;
+	//for(i = 0; i < 10; i ++)
+		Algorithm(1, 5000, 0.01, 0.03, 't', Interval);
 	return 0;
 }
 
@@ -348,7 +354,7 @@ double Cost(int var, double Parameter[var]){
 	return 0;
 */	
 	double tem = pow(e, Parameter[0]) - 2;
-	return (tem > 0)? tem : -tem;
+	return (tem > 0)? tem: -tem;
 }
 
 
