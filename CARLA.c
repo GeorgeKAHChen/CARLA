@@ -11,15 +11,18 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <memory.h>
 
 
 const double pi = 3.141592653589793;
 const double e = 2.718281828459045;
 const int InteSize = 500;
 const int SizeOfR = 500;
+const double omega = 10;
+
 double Cost(int var, double Parameter[var]);
 int sb;								//For test
-
+double Histogram[256];
 
 /*===================DO NOT CHANGE ANYTHING BELOW===================*/
 
@@ -313,7 +316,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			Output += (double)total * LenIntervar * delta;
 			
 		}
-		printf("%0.16f\n", Output);
+		printf("o%0.16f\n", Output);
 
 	}
 	return ;
@@ -334,16 +337,29 @@ int main(int argc, char const *argv[]){
 	return 0;
 */
 	//Interval definition
-	Interval
-	freopen("Input.out", "r", stdin)
+	freopen("Input.out", "r", stdin);
 	freopen("Output.out", "w", stdout);
 
-	double Interval[1][2];
-	Interval[0][0] = 0;
-	Interval[0][1] = 2;
-	//int i;
-	//for(i = 0; i < 10; i ++)
-		Algorithm(1, 10000, 0.01, 0.03, 'p', Interval);
+	int var;
+	for(int var = 0; var < 256; var ++){
+		scanf("%lf", &Histogram[var]);
+	}
+	getchar();
+
+	int ttl, loop;
+	double gw, gh;
+	char mode;
+	scanf("%d%d%lf%lf%c", &ttl, &loop, &gw, &gh, &mode);
+	getchar();
+
+	double Interval[ttl][2];
+	for(var = 0; var < ttl; var ++){
+		scanf("%lf%lf", &Interval[var][0], &Interval[var][1]);
+		getchar();
+	}
+	
+	Algorithm(ttl, loop, gw, gh, mode, Interval);
+	
 	return 0;
 }
 
@@ -358,8 +374,23 @@ double Cost(int var, double Parameter[var]){
 
 	return 0;
 */	
-	double tem = pow(e, Parameter[0]) - 2;
-	return (tem > 0)? tem: -tem;
+	double Output[256];
+	int par, loc;
+	double tem, Total = 0, Prob = 0;
+	for(par = 0; par < var / 3; par ++){
+		for(loc = 0; loc < 256; loc ++){
+			//0: Prob, 1: sigma, 2: mu
+			Prob += Parameter[3 * par];
+			tem = exp(- pow((loc - Parameter[3 * par + 2]), 2) / (2 * Parameter[3 * par + 1] * Parameter[3 * par + 1]));
+			Output[loc] += (Parameter[3 * par] * tem) / (Parameter[3 * par + 1] * sqrt(2 * pi));
+		}
+	}
+	for(loc = 0; loc < 256; loc ++)
+		Total += pow((Output[loc] - Histogram[loc]), 2);
+	Total /= 256;
+	if (Prob <= 1)					Total = Total + omega * (1 - Prob);
+	else							Total = Total + omega * (Prob - 1);
+	return Total;
 }
 
 

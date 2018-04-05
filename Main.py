@@ -25,7 +25,7 @@ from copy import deepcopy
 import Init
 import CARLA
 import Pretreatment
-
+import Constant
 
 def MainFunction():
 	#Image input 
@@ -36,38 +36,43 @@ def MainFunction():
 	Differential = Pretreatment.DerHis(Histogram)
 	ZCNumber = Pretreatment.Sta2Der(Differential)
 
-	#print(ZCNumber)
-	class CARLA_Image(CARLA.CARLA):
-		def Consume(self, ImaGroup):
-			import math
-			Omega = 1
 
-			Array = [0.00 for n in range(256)]
-			Prob = 0
-			for i in range(0, len(ImaGroup) // 3):
-				for j in range(0, len(Array)):
-					Array[j] += ImaGroup[3 * i] / (math.sqrt(2 * math.pi) * ImaGroup[3 * i + 1]) * math.exp( - pow(j - ImaGroup[3 * i + 2], 2) / (2 * ImaGroup[3 * i + 1]* ImaGroup[3 * i + 1]) )
-					Prob += ImaGroup[3 * i]
-			TTL = 0
-			for i in range(0, len(Array)):
-				TTL += pow(Array[i] - self.Other[i], 2)
-			TTL /= 256
-			TTL += Omega * pow((1 - Prob), 2)
-			return TTL
-			
 
-	Interval = []
-	for i in range(0, ZCNumber):
-		Interval.append([1/ZCNumber, 0])
-		Interval.append([128, 0]) 
-		Interval.append([255, 0])
-	#print(Interval)
+	if Init.SystemJudge() == 0:
+		if not os.path.exists("CARLA"):
+			os.system("gcc CARLA.c -o CARLA")
+	else:
+		if not os.path.exists("CARLA.exe"):
+			os.system("gcc CARLA.c")
 
-	CARLA_Image_Learning = CARLA_Image(Interval, "-a", 200, 2, 0.3, Histogram)
+	Str = "Reading data"
+	FileName = "Input.out"
+	os.system("rm " + FileName)
+	Init.BuildFile(FileName)
+	File = open(FileName, "a")
+	File.write(Str)
+	File.close()
 
-	Solution = CARLA_Image_Learning.Algorithm()
+	if Init.SystemJudge() == 0:
+		os.system("./CARLA")
+	else:
+		os.system(".\CARLA.exe")
+	
 
-	print(Solution)
+	FileName = "Output"
+	File = open(FileName, "r")
+	DataOutput = []
+	while 1:
+		FileLine = File.readline()
+		if not FileLine:
+			break
+		
+		if FileLine[0] == "o":
+			TemStr = ""
+			for i in range(1, len(FileLine)):
+				TemStr += FileLine[i]
+			DataOutput.append(float(FileLine))
+		
 	return
 
 
