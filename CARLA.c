@@ -20,6 +20,7 @@ const int SizeOfR = 500;
 double Cost(int var, double Parameter[var]);
 int sb;								//For test
 
+
 /*===================DO NOT CHANGE ANYTHING BELOW===================*/
 
 
@@ -225,13 +226,15 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			//Calculation of Jmed
 			//Definition and Initialization
 			int TemSize;
-			if (sizeof(J) / sizeof(double) <= SizeOfR)		TemSize = kase + 1;
+			if (kase <= SizeOfR)							TemSize = kase + 1;
 			else											TemSize = 501;
-			
+
 			double TemJ[TemSize];
-			memcpy(TemJ, J[par] + TemSize - 1, sizeof(TemJ));
-			Jmed[par] = quick_sort(kase + 1, TemJ);
-			//ここのコードは多分問題があるますが、その後で調べてください。
+			memcpy(TemJ, J[par] + kase - TemSize + 1, sizeof(TemJ));
+			//Here I used pointer to make the copy faster
+			
+			Jmed[par] = quick_sort(TemSize, TemJ);
+			sb = 0;
 
 			//Calculation of Jmin
 			if (kase == 0)		
@@ -264,10 +267,10 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		*/
 
 			if (command == 't')
-				printf("%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", kase, z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
 
 			if (command == 'p'){
-				printf("sb:\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", kase, z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
 
 				double Output = 0;
 				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
@@ -331,14 +334,16 @@ int main(int argc, char const *argv[]){
 	return 0;
 */
 	//Interval definition
-	//freopen("SaveArr", "w", stdout);
+	Interval
+	freopen("Input.out", "r", stdin)
+	freopen("Output.out", "w", stdout);
 
 	double Interval[1][2];
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
 	//int i;
 	//for(i = 0; i < 10; i ++)
-		Algorithm(1, 5000, 0.01, 0.03, 't', Interval);
+		Algorithm(1, 10000, 0.01, 0.03, 'p', Interval);
 	return 0;
 }
 
