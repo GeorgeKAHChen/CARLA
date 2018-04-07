@@ -151,3 +151,6 @@ def ZCAnalysis(img, GausData):
 
 
 
+def PrintHis(arr):
+	
+

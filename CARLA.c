@@ -40,7 +40,6 @@ double Random(int seed){
 
 	//Definition and Initialization
 	double num;
-	srand(seed);
 
 	//Main Loop, get random number
 	int i;
@@ -109,7 +108,6 @@ double quick_sort(const int len, double arr[len]) {
 	return arr[(int)(len/2)];
 }
 
-
 void Algorithm(const int var, const int ttl, const double gw, const double gh, const char command, double Interval[var][2]){
 /*	
 	//Function Instruction:
@@ -140,7 +138,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	double sigma[var];					//To save all sigma parameter
 
 
-	int seed = time(NULL);				//For random number getting
+	srand(time(NULL));				//For random number getting
 	double z;							//A random number which is the PDF integral value
 	double tem;							//A temple tank for saving calculation value
 
@@ -163,17 +161,20 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		*/
 			//STILL HAVE SOME ERROR
 			//I will recovery this bug latter, with the Mersenne Twister algorithm
-			z = Random(seed);
-			seed = (int)(z * 1000000);
+			z = Random();
 
 		/*
 			========================Newton's Method, get x========================
 		*/
 
+			
 			//Definition and Initialization
 			double delta = (Interval[par][0] + Interval[par][1]) / 2;
 			double Remdelta = 0;
 
+
+			/*Newton's Method*/
+			/*	STILL HAVE BUG!!
 			//Main Loop
 			int loop;
 			for(loop = 0; loop < 1000; loop ++){
@@ -185,26 +186,81 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 					tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 					Fx = alpha[par][k] * (Fx + tem);
 				}
-
 				//Normal function(Partial function) integral
 				double dFx = 1 / (Interval[par][1] - Interval[par][0]);
 				for(k = 1; k <= kase; k ++){
 					tem = exp(- pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par]) );
-					tem = beta[par][k] * lambda[par] * sqrt(pi) / 2 * tem;
+					tem = beta[par][k] * lambda[par] * tem;
 					dFx = alpha[par][k] * (dFx + tem);
 				}
 
 				//Newton's iterator
 				Remdelta = delta;
 				delta = delta - (Fx - z) / dFx;
-				
+
 				//Condition judgement
-				if ((delta - Remdelta < 0.000001) && (delta - Remdelta > -0.000001))
+				if ((delta - Remdelta < 0.0001) && (delta - Remdelta > -0.0001))
 					break;
 			}
 
-			x[par][kase] = delta;
+			if (delta > Interval[par][1])				x[par][kase] = Interval[par][1];
+			else if(delta < Interval[par][0])			x[par][kase] = Interval[par][0];
+			else										x[par][kase] = delta;
+			*/
+			/*Newton's Method END*/
 
+
+			/*Bisection Method*/
+			double Left = Interval[par][0];
+			double Right = Interval[par][1];
+			double MedVal;
+			int loop, k;
+			double FLeft, FRight, FMed;
+			
+			FLeft = (Left - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
+			for(k = 1; k <= kase; k ++){
+				tem = erf( (Left - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
+				tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+				FLeft = alpha[par][k] * (FLeft + tem);
+			}
+			FLeft -= z;
+
+			FRight = (Right - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
+			for(k = 1; k <= kase; k ++){
+				tem = erf( (Right - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
+				tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+				FRight = alpha[par][k] * (FRight + tem);
+			}
+			FRight -= z;
+
+			for(loop = 0; loop < 1000; loop ++){
+				MedVal = (Left + Right) / 2;
+				double FMed = (MedVal - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
+				for(k = 1; k <= kase; k ++){
+					tem = erf( (MedVal - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
+					tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+					FMed = alpha[par][k] * (FMed + tem);
+				}
+				FMed -= z;
+
+				if((Remdelta - MedVal < 0.00000001) && (Remdelta - MedVal > -0.00000001))
+					break;
+				//printf("%f\t%f\t%f\t%f\t%f\t%f\n", Left, Right, FLeft, FRight, MedVal, FMed);
+				
+				Remdelta = MedVal;
+				if (FMed * FLeft < 0){
+					Right = MedVal;
+					FRight = FMed;
+				}
+				else{
+					Left = MedVal;
+					FLeft = FMed;
+				}
+			}
+
+			x[par][kase] = MedVal;
+			/*Bisection Method END*/
+			//scanf("%d", &sb);
 		/*
 			=========================Calculate the cost J=========================
 		*/
@@ -316,7 +372,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			Output += (double)total * LenIntervar * delta;
 			
 		}
-		printf("o%0.16f\n", Output);
+		printf("%0.16f\n", Output);
 
 	}
 	return ;
@@ -392,14 +448,6 @@ double Cost(int var, double Parameter[var]){
 	else							Total = Total + omega * (Prob - 1);
 	return Total;
 }
-
-
-
-
-
-
-
-
 
 
 
