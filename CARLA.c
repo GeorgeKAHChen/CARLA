@@ -27,7 +27,7 @@ double Histogram[256];
 /*===================DO NOT CHANGE ANYTHING BELOW===================*/
 
 
-double Random(int seed){
+double Random(){
 /*	
 	//Function Instruction:
 	This function will return a random number with seed
@@ -154,8 +154,10 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	//Main Loop
 	int kase;
 	for(kase = 0; kase < ttl; kase ++){
+		printf("%d\n", kase);
 		int par;
 		for(par = 0; par < var; par ++){
+			printf("%d\n", par);
 		/*
 			==========Get the random number z, which is the PDF integral value==========
 		*/
@@ -210,6 +212,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			/*Newton's Method END*/
 
 
+
 			/*Bisection Method*/
 			double Left = Interval[par][0];
 			double Right = Interval[par][1];
@@ -261,6 +264,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			x[par][kase] = MedVal;
 			/*Bisection Method END*/
 			//scanf("%d", &sb);
+
 		/*
 			=========================Calculate the cost J=========================
 		*/
@@ -278,7 +282,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 			//Calculate the cost
 			J[par][kase] = Cost(var, Parameter);
-
+			
 		/*
 			====================Reflesh the medium and minimum cost====================
 		*/
@@ -291,9 +295,8 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			double TemJ[TemSize];
 			memcpy(TemJ, J[par] + kase - TemSize + 1, sizeof(TemJ));
 			//Here I used pointer to make the copy faster
-			
+
 			Jmed[par] = quick_sort(TemSize, TemJ);
-			sb = 0;
 
 			//Calculation of Jmin
 			if (kase == 0)		
@@ -394,13 +397,14 @@ int main(int argc, char const *argv[]){
 */
 	//Interval definition
 	freopen("Input.out", "r", stdin);
-	freopen("Output.out", "w", stdout);
+	//freopen("Output.out", "w", stdout);
 
 	int var;
 	for(int var = 0; var < 256; var ++){
 		scanf("%lf", &Histogram[var]);
+		getchar();
 	}
-	getchar();
+	
 
 	int ttl, loop;
 	double gw, gh;
@@ -413,7 +417,7 @@ int main(int argc, char const *argv[]){
 		scanf("%lf%lf", &Interval[var][0], &Interval[var][1]);
 		getchar();
 	}
-	
+
 	Algorithm(ttl, loop, gw, gh, mode, Interval);
 	
 	return 0;
@@ -441,6 +445,10 @@ double Cost(int var, double Parameter[var]){
 			Output[loc] += (Parameter[3 * par] * tem) / (Parameter[3 * par + 1] * sqrt(2 * pi));
 		}
 	}
+	int cnmb;
+	for(cnmb = 0; cnmb < 256; cnmb ++)
+		printf("%f\t", Output[cnmb]);
+	printf("\n");
 	for(loc = 0; loc < 256; loc ++)
 		Total += pow((Output[loc] - Histogram[loc]), 2);
 	Total /= 256;

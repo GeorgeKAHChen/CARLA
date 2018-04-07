@@ -54,8 +54,8 @@ import random
 import Init
 
 def Histogram(img):
-	Statistic = [0 for n in range(260)]
-	Probability = [0.00 for n in range(260)]
+	Statistic = [0 for n in range(258)]
+	Probability = [0.00 for n in range(258)]
 	TTL = 0
 
 	for i in range(0, len(img)):
@@ -70,11 +70,11 @@ def Histogram(img):
 
 
 def DerHis(HisArr):
-	Der1 = [0.00 for n in range(259)]
+	Der1 = [0.00 for n in range(257)]
 	for i in range(0, len(Der1)):
 		Der1[i] = HisArr[i+1] - HisArr[i]
 
-	Der2 = [0.00 for n in range(258)]
+	Der2 = [0.00 for n in range(256)]
 	for i in range(0, len(Der2)):
 		Der2[i] = Der1[i+1] - Der1[i]
 
@@ -121,7 +121,7 @@ def Sta2Der(DerArr):
 		if ZeroCross[2 * i] != ZeroCross[2 * i + 1]:
 			PairZero.append([ZeroCross[2 * i], ZeroCross[2 * i + 1]])
 
-	return len(PairZero)
+	return PairZero
 
 
 def ZCAnalysis(img, GausData):
@@ -151,6 +151,66 @@ def ZCAnalysis(img, GausData):
 
 
 
-def PrintHis(arr):
+def FigurePrint(img, kind):
+	plt.imshow(img, cmap="gray")
+	plt.axis("off")
+	plt.show()
+	Init.LogWrite("Figure output succeed", "0")
+	if kind == 1:
+		InpStr = input("Save the figure?[Y/ n]")
+		if InpStr == "Y" or InpStr == "y":
+			Name = "Figure_"
+			Name += str(Init.GetTime())
+			Name += ".png"
+			Output(img, Name, 2)
+	elif kind == 1:
+		pass
+	elif kind == 3:
+		Name = "Figure_"
+		Name += str(Init.GetTime())
+		Name += ".png"
+		Output(img, Name, 2)
+	return
+
+
+def ProbLearn(HisArr, ZeroC):
+	mu = []
+	sigma = []
+	for i in range(0, len(ZeroC)):
+		mu.append(((ZeroC[i][1] - ZeroC[i][0]) / 2) + ZeroC[i][0])
+		sigma.append((ZeroC[i][1] - ZeroC[i][0]) / 2)
+
+
+	def SumProb():
+		#This function can confident if the loop finish condition is establish
+		Prob = 0.00
+		for i in range(0, len(ZeroC)):
+			for p in range(ZeroC[i][0], ZeroC[i][1]):
+				Prob += HisArr[p]
+		if Prob > 0.97:
+			return True
+		else:
+			return False
 	
+	ZeroC[0][0] = 0
+	ZeroC[len(ZeroC) - 1][1] = 255
+	Loop = 0
+	while 1:
+		Loop += 1
+		for i in range(0, len(ZeroC)):
+			Interval = ZeroC[i][1] - ZeroC[i][0]
+			if i != 0:
+				ZeroC[i][0] = max(ZeroC[i - 1][1], ZeroC[i][0] - Interval)
+
+			if i != len(ZeroC)-1:
+				ZeroC[i][1] = min(ZeroC[i + 1][0], ZeroC[i][1] + Interval)
+		
+		if SumProb() == True:
+			break
+		else:
+			continue
+
+	return ZeroC
+
+
 

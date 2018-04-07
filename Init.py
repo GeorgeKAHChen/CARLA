@@ -274,16 +274,24 @@ def GetTime():
 	return ReturnTime
 
 
-def ArrOutput(Arr):
+def ArrOutput(Arr, Mode):
 	FileName = "SaveArr" + str(GetTime())
 	BuildFile(FileName)
 	File = open(FileName, "a")
 	Str = ""
+	if Mode == 1:
+		Str += "["
 	for i in range(0, len(Arr)):
 		for j in range(0, len(Arr[i])):
 			Str += str(Arr[i][j])
-			Str += "\t"
-		Str += "\n"
+			if Mode == 0:
+				Str += "\t"
+			elif Mode == 1:
+				Str += ", "
+		if Mode == 0:
+			Str += ""
+		elif Mode == 1:
+			Str += "]\n["
 	File.write(Str)
 	File.close()
 

@@ -8,9 +8,9 @@
 
 gw = 0.2
 gh = 0.03
-Loop = 2000
+Loop = 500
 
-mode = "w"
+mode = "t"
 #w = work
 #p = presentation, will output all data
 #t = test, will output key data
