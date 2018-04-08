@@ -213,4 +213,37 @@ def ProbLearn(HisArr, ZeroC):
 	return ZeroC
 
 
+def Treasholding(img, TSH):
+	TemImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
+	for i in range(0, len(img)):
+		for j in range(0, len(img[i])):
+			if img[i][j] < TSH:
+				TemImg[i][j] = 0
+			else:
+				TemImg[i][j] = 255
+
+	return cv2.Canny(np.uint8(TemImg), 85, 170)
+
+
+def AutoTH(Histogram, varTH):
+	Prob = 1 / varTH
+	Sum = 0
+	Loc = []
+	for i in range(0, len(Histogram)):
+		Sum += Histogram[i]
+		Tem = False
+		while 1:
+			if Sum >= Prob:
+				Sum -= Prob
+				if Tem == False:
+					Loc.append(i)
+					Tem = True
+					continue
+			else:
+				break
+	return Loc
+
+
+
+
 

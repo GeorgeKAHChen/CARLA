@@ -154,10 +154,8 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	//Main Loop
 	int kase;
 	for(kase = 0; kase < ttl; kase ++){
-		printf("%d\n", kase);
 		int par;
 		for(par = 0; par < var; par ++){
-			printf("%d\n", par);
 		/*
 			==========Get the random number z, which is the PDF integral value==========
 		*/
@@ -276,7 +274,10 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 					Parameter[loop] = x[loop][kase];
 				}
 				else{
-					Parameter[loop] = x[loop][kase - 1];
+					if (kase == 0)
+						Parameter[loop] = (Interval[loop][0] + Interval[loop][1]) / 2;
+					else
+						Parameter[loop] = x[loop][kase - 1];
 				}
 			}
 
@@ -375,7 +376,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			Output += (double)total * LenIntervar * delta;
 			
 		}
-		printf("%0.16f\n", Output);
+		printf("o%0.16f\n", Output);
 
 	}
 	return ;
@@ -404,7 +405,6 @@ int main(int argc, char const *argv[]){
 		scanf("%lf", &Histogram[var]);
 		getchar();
 	}
-	
 
 	int ttl, loop;
 	double gw, gh;
@@ -437,6 +437,8 @@ double Cost(int var, double Parameter[var]){
 	double Output[256];
 	int par, loc;
 	double tem, Total = 0, Prob = 0;
+	
+	//SOME ERROR IN THIS PART OF CODE
 	for(par = 0; par < var / 3; par ++){
 		for(loc = 0; loc < 256; loc ++){
 			//0: Prob, 1: sigma, 2: mu
@@ -445,9 +447,10 @@ double Cost(int var, double Parameter[var]){
 			Output[loc] += (Parameter[3 * par] * tem) / (Parameter[3 * par + 1] * sqrt(2 * pi));
 		}
 	}
-	int cnmb;
-	for(cnmb = 0; cnmb < 256; cnmb ++)
-		printf("%f\t", Output[cnmb]);
+	int ka;
+	for (ka = 0; ka < 256; ka ++){
+		printf("%f\t", Output[ka]);
+	}
 	printf("\n");
 	for(loc = 0; loc < 256; loc ++)
 		Total += pow((Output[loc] - Histogram[loc]), 2);
