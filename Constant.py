@@ -8,7 +8,7 @@
 
 gw = 0.2
 gh = 0.03
-Loop = 500
+Loop = 2000
 
 mode = "t"
 #w = work

@@ -30,7 +30,7 @@ import Constant
 
 def Main():
 	#Image input 
-	img = np.array(Image.open("Figure/01.png").convert("L"))
+	img = np.array(Image.open("Figure/11.png").convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -45,7 +45,7 @@ def Main():
 	PairOfZC = []
 
 	for i in range(0, len(ZCNumber)):
-		if ZCNumber[i][1] - ZCNumber[i][0] < 3:
+		if ZCNumber[i][1] - ZCNumber[i][0] < 4:
 			continue
 		else:
 			PairOfZC.append(ZCNumber[i])
@@ -112,15 +112,19 @@ def Main():
 			for i in range(1, len(FileLine)):
 				TemStr += FileLine[i]
 			DataOutput.append(float(TemStr))
+	
+	Treasholding = []
+
+	for i in range(0, int(((len(DataOutput)) - 1) / 3)):
+			Treasholding.append((DataOutput[i * 3 + 2] + DataOutput[i * 3 + 5]) / 2)
 
 	#Figure Segmentation
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
-	for i in range(0, len(DataOutput)):
-		if i % 3 == 2:
-			TemImg = Pretreatment.Treasholding(img, DataOutput[i])
-			for p in range(0, len(OutImg)):
-				for q in range(0, len(OutImg[p])):
-					OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
+	for i in range(0, len(Treasholding)):
+		TemImg = Pretreatment.Treasholding(img, Treasholding[i])
+		for p in range(0, len(OutImg)):
+			for q in range(0, len(OutImg[p])):
+				OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
 
 	for p in range(0, len(OutImg)):
 		for q in range(0, len(OutImg[p])):
@@ -210,17 +214,40 @@ def Main1():
 
 
 def Main2():
+	import pandas as pd
+	from gap_statistic import OptimalK
+	from sklearn.datasets.samples_generator import make_blobs
+	from sklearn.cluster import KMeans
+	
 	#Image input 
-	img = np.array(Image.open("Figure/01.png").convert("L"))
+	img = np.array(Image.open("Figure/04.png").convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
 
-	Treasholding = Pretreatment.AutoTH(Histogram, 5)
+	#Gap statistic
+	optimalK = OptimalK(parallel_backend = 'joblib')
+	ClusterSet = []
+	for i in range(0, len(img)):
+		for j in range(0, len(img[i])):
+			ClusterSet.append([i, j, img[i, j]])
+	ClusterSet = np.array(ClusterSet)
+
+	print(len(ClusterSet))
+	print(ClusterSet)
+	#DEBUG!!!!!!!!
+	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
+
+	print(N_Cluster)
+	if N_Cluster < 2:
+		N_Cluster = 2
+	
+	#Getting treasholding with Probability
+	Treasholding = Pretreatment.AutoTH(Histogram, N_Cluster)
 
 	print("Pretreatment finished")
 
-	DataOutput = []
+	DataOutput = np.array([])
 	for i in range(0, len(Treasholding)):
 		DataOutput.append(0)
 		DataOutput.append(0)
@@ -243,7 +270,6 @@ def Main2():
 		for q in range(0, len(OutImg[p])):
 			OutImg[p][q] = 255 - OutImg[p][q]
 	
-	#==============================================
 	
 	plt.imshow(OutImg, cmap="gray")
 	plt.axis("off")
@@ -264,8 +290,8 @@ def Main2():
 
 
 if __name__ == "__main__":
-	Main()
-	#Main2()
+	#Main()
+	Main2()
 
 
 
