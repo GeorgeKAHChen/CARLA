@@ -398,7 +398,7 @@ int main(int argc, char const *argv[]){
 */
 	//Interval definition
 	freopen("Input.out", "r", stdin);
-	//freopen("Output.out", "w", stdout);
+	freopen("Output.out", "w", stdout);
 
 	int var;
 	for(int var = 0; var < 256; var ++){
@@ -417,7 +417,7 @@ int main(int argc, char const *argv[]){
 		scanf("%lf%lf", &Interval[var][0], &Interval[var][1]);
 		getchar();
 	}
-
+	
 	Algorithm(ttl, loop, gw, gh, mode, Interval);
 	
 	return 0;
@@ -435,23 +435,25 @@ double Cost(int var, double Parameter[var]){
 	return 0;
 */	
 	double Output[256];
+	memset(Output, 0, sizeof(Output));
 	int par, loc;
 	double tem, Total = 0, Prob = 0;
 	
 	//SOME ERROR IN THIS PART OF CODE
 	for(par = 0; par < var / 3; par ++){
+		double Pr, Sigma, Mu;
+		Pr = Parameter[3 * par];
+		Sigma = Parameter[3 * par + 1];
+		Mu = Parameter[3 * par + 2];
 		for(loc = 0; loc < 256; loc ++){
 			//0: Prob, 1: sigma, 2: mu
-			Prob += Parameter[3 * par];
-			tem = exp(- pow((loc - Parameter[3 * par + 2]), 2) / (2 * Parameter[3 * par + 1] * Parameter[3 * par + 1]));
-			Output[loc] += (Parameter[3 * par] * tem) / (Parameter[3 * par + 1] * sqrt(2 * pi));
+			Prob += Pr;
+			tem = exp(- pow(loc - Mu, 2) / (2 * Sigma * Sigma));
+			Output[loc] += (tem * Pr) / (Sigma * sqrt(2 * pi));
 		}
 	}
-	int ka;
-	for (ka = 0; ka < 256; ka ++){
-		printf("%f\t", Output[ka]);
-	}
-	printf("\n");
+	
+	//scanf("%d", &sb);
 	for(loc = 0; loc < 256; loc ++)
 		Total += pow((Output[loc] - Histogram[loc]), 2);
 	Total /= 256;

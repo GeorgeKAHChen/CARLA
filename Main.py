@@ -30,7 +30,7 @@ import Constant
 
 def Main():
 	#Image input 
-	img = np.array(Image.open("Figure/06.png").convert("L"))
+	img = np.array(Image.open("Figure/01.png").convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -43,6 +43,7 @@ def Main():
 	
 	#Determint the ZeroCrossing Pair are not too small
 	PairOfZC = []
+
 	for i in range(0, len(ZCNumber)):
 		if ZCNumber[i][1] - ZCNumber[i][0] < 3:
 			continue
@@ -50,7 +51,13 @@ def Main():
 			PairOfZC.append(ZCNumber[i])
 	
 	#ZeroCrossing Learning
-	PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
+	if len(PairOfZC) >= 2:
+		PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
+	elif len(PairOfZC) == 1:
+		pass
+	else:
+		PairOfZC.append([0, 127])
+		PairOfZC.append([128, 255])
 	
 	print("Pretreatment finished")
 	
@@ -75,8 +82,10 @@ def Main():
 
 	#Compile C files
 	if Init.SystemJudge() == 0:		
+		os.system("rm CARLA")
 		os.system("gcc CARLA.c -o CARLA")
 	else:
+		os.system("rm CARLA.exe")
 		os.system("gcc CARLA.c")
 
 	print("Input.out writing finished, main algorithm loop begin.")
@@ -102,7 +111,20 @@ def Main():
 			TemStr = ""
 			for i in range(1, len(FileLine)):
 				TemStr += FileLine[i]
-			DataOutput.append(float(FileLine))
+			DataOutput.append(float(TemStr))
+
+	#Figure Segmentation
+	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
+	for i in range(0, len(DataOutput)):
+		if i % 3 == 2:
+			TemImg = Pretreatment.Treasholding(img, DataOutput[i])
+			for p in range(0, len(OutImg)):
+				for q in range(0, len(OutImg[p])):
+					OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
+
+	for p in range(0, len(OutImg)):
+		for q in range(0, len(OutImg[p])):
+			OutImg[p][q] = 255 - OutImg[p][q]
 
 	plt.imshow(OutImg, cmap="gray")
 	plt.axis("off")
@@ -242,7 +264,7 @@ def Main2():
 
 
 if __name__ == "__main__":
-	Main1()
+	Main()
 	#Main2()
 
 
