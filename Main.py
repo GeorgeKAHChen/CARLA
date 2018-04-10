@@ -30,7 +30,7 @@ import Constant
 
 def Main():
 	#Image input 
-	img = np.array(Image.open("Figure/11.png").convert("L"))
+	img = np.array(Image.open("Figure/01.png").convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -113,15 +113,17 @@ def Main():
 				TemStr += FileLine[i]
 			DataOutput.append(float(TemStr))
 	
-	Treasholding = []
+	Treasholding = [0]
 
 	for i in range(0, int(((len(DataOutput)) - 1) / 3)):
-			Treasholding.append((DataOutput[i * 3 + 2] + DataOutput[i * 3 + 5]) / 2)
+		Treasholding.append((DataOutput[i * 3 + 2] + DataOutput[i * 3 + 5]) / 2)
+
+	Treasholding.append(255)
 
 	#Figure Segmentation
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
-	for i in range(0, len(Treasholding)):
-		TemImg = Pretreatment.Treasholding(img, Treasholding[i])
+	for i in range(0, len(Treasholding) - 1):
+		TemImg = Pretreatment.Treasholding(img, Treasholding[i], Treasholding[i + 1])
 		for p in range(0, len(OutImg)):
 			for q in range(0, len(OutImg[p])):
 				OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
@@ -220,7 +222,7 @@ def Main2():
 	from sklearn.cluster import KMeans
 	
 	#Image input 
-	img = np.array(Image.open("Figure/04.png").convert("L"))
+	img = np.array(Image.open("Figure/11.png").convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -230,37 +232,44 @@ def Main2():
 	ClusterSet = []
 	for i in range(0, len(img)):
 		for j in range(0, len(img[i])):
-			ClusterSet.append([i, j, img[i, j]])
+			ClusterSet.append([float(img[i, j])])
 	ClusterSet = np.array(ClusterSet)
 
+	"""
 	print(len(ClusterSet))
 	print(ClusterSet)
-	#DEBUG!!!!!!!!
+	
 	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
 
 	print(N_Cluster)
 	if N_Cluster < 2:
 		N_Cluster = 2
-	
+	"""
+	N_Cluster = 3
 	#Getting treasholding with Probability
 	Treasholding = Pretreatment.AutoTH(Histogram, N_Cluster)
 
 	print("Pretreatment finished")
 
-	DataOutput = np.array([])
+	DataOutput = []
 	for i in range(0, len(Treasholding)):
 		DataOutput.append(0)
 		DataOutput.append(0)
 		DataOutput.append(Treasholding[i])
 
 	#Figure Segmentation
-	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
+	UsingTH = [0]
 	for i in range(0, len(DataOutput)):
 		if i % 3 == 2:
-			TemImg = Pretreatment.Treasholding(img, DataOutput[i])
-			for p in range(0, len(OutImg)):
-				for q in range(0, len(OutImg[p])):
-					OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
+			UsingTH.append(DataOutput[i])
+	UsingTH.append(255)
+
+	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
+	for i in range(0, len(UsingTH) - 1):
+		TemImg = Pretreatment.Treasholding(img, UsingTH[i], UsingTH[i + 1])
+		for p in range(0, len(OutImg)):
+			for q in range(0, len(OutImg[p])):
+				OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
 
 	#InpK = np.array([[1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1]])
 	#OutImg = signal.fftconvolve(OutImg, InpK[::-1], mode='full')
@@ -290,8 +299,7 @@ def Main2():
 
 
 if __name__ == "__main__":
-	#Main()
-	Main2()
+	Main()
 
 
 

@@ -213,11 +213,11 @@ def ProbLearn(HisArr, ZeroC):
 	return ZeroC
 
 
-def Treasholding(img, TSH):
+def Treasholding(img, TSH, TSH2):
 	TemImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
 	for i in range(0, len(img)):
 		for j in range(0, len(img[i])):
-			if img[i][j] < TSH:
+			if img[i][j] < TSH or img[i][j] > TSH2:
 				TemImg[i][j] = 0
 			else:
 				TemImg[i][j] = 255
