@@ -137,7 +137,7 @@ def Main(ImageName):
 		plt.axis("off")
 		plt.show()
 		InpStr = input("Save the figure?[Y/ n]")
-	return img
+	return OutImg
 
 
 def Main1(ImageName):
@@ -195,7 +195,7 @@ def Main1(ImageName):
 		plt.show()
 		InpStr = input("Save the figure?[Y/ n]")
 
-	return img	
+	return OutImg	
 
 
 
@@ -281,32 +281,101 @@ def Main2(ImageName):
 		plt.imshow(OutImg, cmap="gray")
 		plt.axis("off")
 		plt.show()
-		InpStr = input("Save the figure?[Y/ n]")
+		InpStr = input("Press Enter to continue")
 
-	return img
+	#For medicine================================================
+	"""
+	plt.imshow(img, cmap="gray")
+	plt.axis("off")
+	plt.show()
+	InpStr = input("Press Enter to continue")
+
+	PointY = Init.IntInput("Input location X = ", "0", "999999999", "int")
+	PointX = Init.IntInput("Input location Y = ", "0", "999999999", "int")
+	AnoImg = [[0 for n in range(len(img[0]))] for n in range(len(img))]
+
+	Stack = [[PointX, PointY]]
+	AnoImg[PointX][PointY] = 1
+	while 1:
+		tem1 = Stack.pop()
+		LocX = tem1[0]
+		LocY = tem1[1]
+		if OutImg[LocX + 1][LocY] >= 5 and AnoImg[LocX + 1][LocY] == 0:
+			Stack.append([LocX + 1, LocY])
+			AnoImg[LocX + 1][LocY] = 1
+		
+		elif AnoImg[LocX + 1][LocY] != 1:
+			AnoImg[LocX + 1][LocY] = 255
 
 
+		if OutImg[LocX - 1][LocY] >= 5 and AnoImg[LocX - 1][LocY] == 0:
+			Stack.append([LocX - 1, LocY])
+			AnoImg[LocX - 1][LocY] = 1
+	
+		elif AnoImg[LocX - 1][LocY] != 1:
+			AnoImg[LocX - 1][LocY] = 255
 
+
+		if OutImg[LocX][LocY + 1] >= 5 and AnoImg[LocX][LocY + 1] == 0:
+			Stack.append([LocX, LocY + 1])
+			AnoImg[LocX][LocY + 1] = 1
+
+		elif AnoImg[LocX][LocY + 1] != 1:
+			AnoImg[LocX][LocY + 1] = 255
+
+
+		if OutImg[LocX][LocY - 1] >= 5 and AnoImg[LocX][LocY - 1] == 0:
+			Stack.append([LocX, LocY - 1])
+			AnoImg[LocX][LocY - 1] = 1
+
+		elif AnoImg[LocX][LocY - 1] != 1:
+			AnoImg[LocX][LocY - 1] = 255
+
+		if len(Stack) == 0:
+			break
+
+	for p in range(0, len(OutImg)):
+		for q in range(0, len(OutImg[p])):
+			if AnoImg[p][q] == 255:
+				img[p][q] = 255
+
+	plt.imshow(AnoImg, cmap="gray")
+	plt.axis("off")
+	plt.show()
+	InpStr = input("Press Enter to continue")
+
+	plt.imshow(img, cmap="gray")
+	plt.axis("off")
+	plt.show()
+	InpStr = input("Press Enter to continue")
+	"""
+	#For medicine================================================
+
+	return OutImg
+
+
+"""
 if __name__ == "__main__":
-	ImageName = "Figure/03.jpg"
+	os.system("rm -r Output")
+	ImageName = "Figure/Inp9.jpg"
 	img = np.array(Image.open(ImageName).convert("L"))
 	BlockInfo = Pretreatment.Partial(img)
-	for i in range(1, len(BlockInfo) + 1):
-		Subimg = Main2("Output/Block_" + str(i) + ".png")
+	print(BlockInfo)
+	for i in range(1, len(BlockInfo)):
+		Subimg = np.array(Main2("Output/Block_" + str(i) + ".png"))
 		os.system("rm Output/Block_" + str(i) + ".png")
-		Subimg = np.array(Subimg)
-		for i in range(0, len(Subimg)):
-			for j in range(0, len(Subimg[i])):
-				Subimg[i][j] = min(max(int(Subimg[i][j]), 0), 255)
+		for p in range(0, len(Subimg)):
+			for q in range(0, len(Subimg[p])):
+				Subimg[p][q] = min(max(int(Subimg[p][q]), 0), 255)
+		circles1 = cv2.HoughCircles(Subimg, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=30, minRadius=200, maxRadius=300)
+		circles = circles1[0, :, :]
+		for i in circles[:]: 
+			cv2.circle(img, (i[0], i[1]), i[2], 128, 5)
 		Pretreatment.Output(Subimg, "Block_" + str(i) + ".png", 1) 
-	#Pretreatment.Recovery(len(BlockInfo), BlockInfo, "Figure/03.jpg")
+	Pretreatment.Recovery(len(BlockInfo), BlockInfo, "Saving/Out.jpg")
+"""
 
 
 
-
-
-
-
-
-
+Main2("Figure/15.png")
 

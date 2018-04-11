@@ -15,4 +15,4 @@ mode = "w"
 #p = presentation, will output all data
 #t = test, will output key data
 
-FigSize = 512
+FigSize = 256

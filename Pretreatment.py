@@ -277,8 +277,10 @@ def AutoTH(Histogram, varTH):
 
 def Partial(img):
 	FigSize = Constant.FigSize
-	BlockY = (len(img) - 1) // FigSize
+	
 	BlockX = (len(img[0]) - 1) // FigSize
+	BlockY = (len(img) - 1) // FigSize
+	
 	Tem = 0
 	BlockInfo = [[0, 0, 0, 0]]
 	for i in range(0, BlockY + 1):
@@ -287,9 +289,9 @@ def Partial(img):
 			SaveImg = []
 			p = 0
 			q = 0
-			for p in range(0, FigSize + 1):
+			for p in range(0, FigSize):
 				Line = []
-				for q in range(0, FigSize + 1):	
+				for q in range(0, FigSize):	
 					try:
 						Line.append(img[i * FigSize + p][j * FigSize + q])
 					except:
@@ -303,8 +305,8 @@ def Partial(img):
 			BlockInfo.append([i, j, len(SaveImg), len(SaveImg[0])])
 			Output(SaveImg, "Block_" + str(Tem) + ".png", 1)
 
-	BlockInfo[0][2] = FigSize * BlockX  + BlockInfo[len(BlockInfo)-1][2]
-	BlockInfo[0][3] = FigSize * BlockY  + BlockInfo[len(BlockInfo)-1][3]
+	BlockInfo[0][2] = FigSize * BlockX  + BlockInfo[len(BlockInfo)-1][3]
+	BlockInfo[0][3] = FigSize * BlockY  + BlockInfo[len(BlockInfo)-1][2]
 	#print(BlockInfo[len(BlockInfo)-1][2], BlockInfo[len(BlockInfo)-1][3])
 	return BlockInfo
 
@@ -312,7 +314,7 @@ def Partial(img):
 
 def Recovery(BlockSize, BlockInfo, ImageName):
 	FigSize = Constant.FigSize
-	img = [[0 for n in range(BlockInfo[0][3] + 1)] for n in range(BlockInfo[0][2] + 1)]
+	img = [[0 for n in range(BlockInfo[0][2] + 1)] for n in range(BlockInfo[0][3] + 1)]
 	for kase in range(1, len(BlockInfo)):
 		img1 = np.array(Image.open("Output/Block_" + str(kase) + ".png").convert("L"))
 		for i in range(0, len(img1)):
@@ -321,4 +323,59 @@ def Recovery(BlockSize, BlockInfo, ImageName):
 	Output(img, ImageName, 2)
 
 
+def GetBoundary(Tobimg):
+	"""
+	BFS(LocX, LocY, Node)
+		This function is used for breath first search algorithm.
+		The main idea of this function is traversal all the figure to find the boundary of figure
+		LocX = The x Location will judge
+		LocY = The y Location will judge
+		Node = The Block Code of all the figure, if the node is changed, that means this block is boundary 
+		return 1: means the block code had been changed
+			   0: means the block has not been changed
+	Also, this function will use the functional array ReFig
+	"""
+
+	ReFig = [[-1 for n in range(len(Tobimg[0]))] for n in range(len(Tobimg))]
+	
+	def BFS(LocX, LocY, Node):
+		Init.LogWrite("[" + str(LocX) + ", " + str(LocY) + "]", "0")
+		if LocX >= len(ReFig) or LocY >= len(ReFig[0]):
+			return 0
+		
+		if ReFig[LocX][LocY] != -1:
+			return 0
+		if Tobimg[LocX][LocY] != Node:
+			return 1
+
+		#print([Tobimg[LocX][LocY], Node])
+		if BFS(LocX + 1, LocY, Tobimg[LocX][LocY]) == 1:
+			ReFig[LocX][LocY] = 255
+		else:
+			ReFig[LocX][LocY] = 0
+		
+		if BFS(LocX, LocY + 1, Tobimg[LocX][LocY]) == 1:
+			ReFig[LocX][LocY] = 255
+		elif ReFig[LocX][LocY] == -1:
+			ReFig[LocX][LocY] = 0
+		return 0
+
+
+	for i in range(0, len(Tobimg)):
+		for j in range(0, len(Tobimg[i])):
+			if ReFig[i][j] != -1:
+				continue
+			else:
+				if BFS(i + 1, j, Tobimg[i][j]) == 1:
+					ReFig[i][j] = 255
+				else:
+					ReFig[i][j] = 0
+				
+				if BFS(i, j + 1, Tobimg[i][j]) == 1:
+					ReFig[i][j] = 255
+				elif ReFig[i][j] == -1:
+					ReFig[i][j] = 0
+					
+	Init.LogWrite("Figure iterator succeed","0")
+	return ReFig
 
