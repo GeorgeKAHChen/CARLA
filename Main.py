@@ -28,9 +28,9 @@ import Pretreatment
 import Constant
 
 
-def Main():
+def Main(ImageName):
 	#Image input 
-	img = np.array(Image.open("Figure/01.png").convert("L"))
+	img = np.array(Image.open(ImageName).convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -68,8 +68,8 @@ def Main():
 		String += "\n"
 	String += str(len(PairOfZC) * 3) + " " + str(Constant.Loop) + " " + str(Constant.gw) + " " + str(Constant.gh) + " " + Constant.mode + "\n"
 	for i in range(0, len(PairOfZC)):
-		String += str(0.0) + " " + str(0.5) + "\n"
-		String += str(0) + " " + str(128) + "\n"
+		String += str(0.0) + " " + str(1) + "\n"
+		String += str(0) + " " + str(255) + "\n"
 		String += str(PairOfZC[i][0]) + " " + str(PairOfZC[i][1]) + "\n"
 	
 	#Parameter Saving and output - File writing
@@ -132,25 +132,17 @@ def Main():
 		for q in range(0, len(OutImg[p])):
 			OutImg[p][q] = 255 - OutImg[p][q]
 
-	plt.imshow(OutImg, cmap="gray")
-	plt.axis("off")
-	plt.show()
-	InpStr = input("Save the figure?[Y/ n]")
-	if InpStr == "Y" or InpStr == "y":
-		Name = "Figure_"
-		Name += str(TimeCal.GetTime())
-		Name += ".png"
-		os.system("cp null " + Name)
-		misc.imsave(Name, img)
-		if not os.path.exists("Output"):
-			os.system("mkdir Output")
-		os.system("mv " + Name + " Output/" + Name)
-	
+	if Constant.mode == "t" or Constant.mode == "p":
+		plt.imshow(OutImg, cmap="gray")
+		plt.axis("off")
+		plt.show()
+		InpStr = input("Save the figure?[Y/ n]")
+	return img
 
 
-def Main1():
+def Main1(ImageName):
 	#Image input 
-	img = np.array(Image.open("Figure/06.png").convert("L"))
+	img = np.array(Image.open(ImageName).convert("L"))
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -197,32 +189,31 @@ def Main1():
 		for q in range(0, len(OutImg[p])):
 			OutImg[p][q] = 255 - OutImg[p][q]
 	
-	plt.imshow(OutImg, cmap="gray")
-	plt.axis("off")
-	plt.show()
-	InpStr = input("Save the figure?[Y/ n]")
-	if InpStr == "Y" or InpStr == "y":
-		Name = "Figure_"
-		Name += str(TimeCal.GetTime())
-		Name += ".png"
-		os.system("cp null " + Name)
-		misc.imsave(Name, img)
-		if not os.path.exists("Output"):
-			os.system("mkdir Output")
-		os.system("mv " + Name + " Output/" + Name)
-	
+	if Constant.mode == "t" or Constant.mode == "p":	
+		plt.imshow(OutImg, cmap="gray")
+		plt.axis("off")
+		plt.show()
+		InpStr = input("Save the figure?[Y/ n]")
+
+	return img	
 
 
 
 
-def Main2():
+def Main2(ImageName):
 	import pandas as pd
 	from gap_statistic import OptimalK
 	from sklearn.datasets.samples_generator import make_blobs
 	from sklearn.cluster import KMeans
 	
 	#Image input 
-	img = np.array(Image.open("Figure/11.png").convert("L"))
+	img = np.array(Image.open(ImageName).convert("L"))
+
+	InpK = np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])/25
+	img1 = signal.fftconvolve(img, InpK[::-1], mode='full')
+	for i in range(0, len(img)):
+		for j in range(0, len(img[i])):
+			img[i][j] = int(img1[i][j])
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
@@ -235,17 +226,24 @@ def Main2():
 			ClusterSet.append([float(img[i, j])])
 	ClusterSet = np.array(ClusterSet)
 
-	"""
-	print(len(ClusterSet))
-	print(ClusterSet)
 	
-	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
-
+	print(len(ClusterSet))
+	#print(ClusterSet)
+	
+	#==============================================================================
+	#Gap statistic main algorithm!!
+	
+	#N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
+	N_Cluster = 3
+	
 	print(N_Cluster)
+	
+	#==============================================================================
+
 	if N_Cluster < 2:
 		N_Cluster = 2
-	"""
-	N_Cluster = 3
+	
+	
 	#Getting treasholding with Probability
 	Treasholding = Pretreatment.AutoTH(Histogram, N_Cluster)
 
@@ -279,28 +277,29 @@ def Main2():
 		for q in range(0, len(OutImg[p])):
 			OutImg[p][q] = 255 - OutImg[p][q]
 	
-	
-	plt.imshow(OutImg, cmap="gray")
-	plt.axis("off")
-	plt.show()
-	InpStr = input("Save the figure?[Y/ n]")
-	if InpStr == "Y" or InpStr == "y":
-		Name = "Figure_"
-		Name += str(Init.GetTime())
-		Name += ".png"
-		os.system("cp null " + Name)
-		misc.imsave(Name, img)
-		if not os.path.exists("Output"):
-			os.system("mkdir Output")
-		os.system("mv " + Name + " Output/" + Name)
+	if Constant.mode == "t" or Constant.mode == "p":
+		plt.imshow(OutImg, cmap="gray")
+		plt.axis("off")
+		plt.show()
+		InpStr = input("Save the figure?[Y/ n]")
 
-
+	return img
 
 
 
 if __name__ == "__main__":
-	Main()
-
+	ImageName = "Figure/03.jpg"
+	img = np.array(Image.open(ImageName).convert("L"))
+	BlockInfo = Pretreatment.Partial(img)
+	for i in range(1, len(BlockInfo) + 1):
+		Subimg = Main2("Output/Block_" + str(i) + ".png")
+		os.system("rm Output/Block_" + str(i) + ".png")
+		Subimg = np.array(Subimg)
+		for i in range(0, len(Subimg)):
+			for j in range(0, len(Subimg[i])):
+				Subimg[i][j] = min(max(int(Subimg[i][j]), 0), 255)
+		Pretreatment.Output(Subimg, "Block_" + str(i) + ".png", 1) 
+	#Pretreatment.Recovery(len(BlockInfo), BlockInfo, "Figure/03.jpg")
 
 
 

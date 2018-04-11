@@ -6,11 +6,13 @@
 #
 ############################################################
 
-gw = 0.02
-gh = 0.3
-Loop = 10000
+gw = 0.2
+gh = 3
+Loop = 1000
 
-mode = "t"
+mode = "w"
 #w = work
 #p = presentation, will output all data
 #t = test, will output key data
+
+FigSize = 512

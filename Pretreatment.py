@@ -52,6 +52,10 @@ import random
 
 #import Files
 import Init
+import Constant
+
+
+
 
 def Histogram(img):
 	Statistic = [0 for n in range(258)]
@@ -225,6 +229,32 @@ def Treasholding(img, TSH, TSH2):
 	return cv2.Canny(np.uint8(TemImg), 85, 170)
 
 
+def Output(img, Name, kind):
+	if Init.SystemJudge() == 0:
+		os.system("cp null " + Name)
+		misc.imsave(Name, img)
+		if kind == 1:
+			if not os.path.exists("Output"):
+				os.system("mkdir Output")
+			os.system("mv " + Name + " Output/" + Name)
+		if kind == 2:
+			if not os.path.exists("Saving"):
+				os.system("mkdir Saving")
+			os.system("mv " + Name + " Saving/" + Name)
+	else:
+		os.system("copy null " + Name)
+		misc.imsave(Name, img)
+		if kind == 1:
+			if not os.path.exists("Output"):
+				os.system("mkdir Output")
+			os.system("move " + Name + " Output/" + Name)
+		if kind == 2:
+			if not os.path.exists("Saving"):
+				os.system("mkdir Saving")
+			os.system("move " + Name + " Saving/" + Name)		
+	return
+
+
 def AutoTH(Histogram, varTH):
 	Prob = 1 / varTH
 	Sum = 0
@@ -244,6 +274,51 @@ def AutoTH(Histogram, varTH):
 	return Loc
 
 
+
+def Partial(img):
+	FigSize = Constant.FigSize
+	BlockY = (len(img) - 1) // FigSize
+	BlockX = (len(img[0]) - 1) // FigSize
+	Tem = 0
+	BlockInfo = [[0, 0, 0, 0]]
+	for i in range(0, BlockY + 1):
+		for j in range(0, BlockX + 1):
+			Tem += 1
+			SaveImg = []
+			p = 0
+			q = 0
+			for p in range(0, FigSize + 1):
+				Line = []
+				for q in range(0, FigSize + 1):	
+					try:
+						Line.append(img[i * FigSize + p][j * FigSize + q])
+					except:
+						break
+				if len(Line) != 0:
+					SaveImg.append(Line)
+				else:
+					break
+			#print([i, j, p, q])
+			#print(img)
+			BlockInfo.append([i, j, len(SaveImg), len(SaveImg[0])])
+			Output(SaveImg, "Block_" + str(Tem) + ".png", 1)
+
+	BlockInfo[0][2] = FigSize * BlockX  + BlockInfo[len(BlockInfo)-1][2]
+	BlockInfo[0][3] = FigSize * BlockY  + BlockInfo[len(BlockInfo)-1][3]
+	#print(BlockInfo[len(BlockInfo)-1][2], BlockInfo[len(BlockInfo)-1][3])
+	return BlockInfo
+
+
+
+def Recovery(BlockSize, BlockInfo, ImageName):
+	FigSize = Constant.FigSize
+	img = [[0 for n in range(BlockInfo[0][3] + 1)] for n in range(BlockInfo[0][2] + 1)]
+	for kase in range(1, len(BlockInfo)):
+		img1 = np.array(Image.open("Output/Block_" + str(kase) + ".png").convert("L"))
+		for i in range(0, len(img1)):
+			for j in range(0, len(img1[i])): 
+				img[FigSize * BlockInfo[kase][0] + i][FigSize * BlockInfo[kase][1] + j] = img1[i][j]
+	Output(img, ImageName, 2)
 
 
 

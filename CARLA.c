@@ -129,11 +129,11 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 	//Saving Definition
 	double x[var][ttl];					//To save all decision point
-	double J[var][ttl];					//To save all cost value
-	double Jmed[var];					//To save medium value of all J
-	double Jmin[var];					//To save minumum value of all J
+	double J[ttl];					//To save all cost value
+	double Jmed;					//To save medium value of all J
+	double Jmin;					//To save minumum value of all J
 	double alpha[var][ttl + 1];			//To save all PDF parameter
-	double beta[var][ttl + 1];			//To save all reinforcement parameter
+	double beta[ttl + 1];			//To save all reinforcement parameter
 	double lambda[var];					//To save all lambda parameter
 	double sigma[var];					//To save all sigma parameter
 
@@ -156,18 +156,14 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	for(kase = 0; kase < ttl; kase ++){
 		int par;
 		for(par = 0; par < var; par ++){
-		/*
-			==========Get the random number z, which is the PDF integral value==========
-		*/
-			//STILL HAVE SOME ERROR
-			//I will recovery this bug latter, with the Mersenne Twister algorithm
+	/*
+		==========Get the random number z, which is the PDF integral value==========
+	*/
 			z = Random();
 
-		/*
-			========================Newton's Method, get x========================
-		*/
-
-			
+	/*
+		========================Newton's Method, get x========================
+	*/		
 			//Definition and Initialization
 			double delta = (Interval[par][0] + Interval[par][1]) / 2;
 			double Remdelta = 0;
@@ -221,7 +217,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			FLeft = (Left - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
 			for(k = 1; k <= kase; k ++){
 				tem = erf( (Left - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
-				tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+				tem = beta[k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 				FLeft = alpha[par][k] * (FLeft + tem);
 			}
 			FLeft -= z;
@@ -229,7 +225,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			FRight = (Right - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
 			for(k = 1; k <= kase; k ++){
 				tem = erf( (Right - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
-				tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+				tem = beta[k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 				FRight = alpha[par][k] * (FRight + tem);
 			}
 			FRight -= z;
@@ -239,7 +235,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 				double FMed = (MedVal - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
 				for(k = 1; k <= kase; k ++){
 					tem = erf( (MedVal - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
-					tem = beta[par][k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+					tem = beta[k] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 					FMed = alpha[par][k] * (FMed + tem);
 				}
 				FMed -= z;
@@ -262,78 +258,73 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			x[par][kase] = MedVal;
 			/*Bisection Method END*/
 			//scanf("%d", &sb);
+		}
+	/*
+		=========================Calculate the cost J=========================
+	*/
 
-		/*
-			=========================Calculate the cost J=========================
-		*/
+		//Get the parameter group at present.
+		double Parameter[var];
+		int loop;
+		for(loop = 0; loop < var; loop ++)
+			Parameter[loop] = x[loop][kase];
 
-			//Get the parameter group at present.
-			double Parameter[var];
-			for(loop = 0; loop < var; loop ++){
-				if (loop <= par){
-					Parameter[loop] = x[loop][kase];
-				}
-				else{
-					if (kase == 0)
-						Parameter[loop] = (Interval[loop][0] + Interval[loop][1]) / 2;
-					else
-						Parameter[loop] = x[loop][kase - 1];
-				}
-			}
+		//Calculate the cost
+		J[kase] = Cost(var, Parameter);
+		
+	/*
+		====================Reflesh the medium and minimum cost====================
+	*/
+		//Calculation of Jmed
+		//Definition and Initialization
+		int TemSize;
+		if (kase <= SizeOfR)							TemSize = kase + 1;
+		else											TemSize = 501;
 
-			//Calculate the cost
-			J[par][kase] = Cost(var, Parameter);
-			
-		/*
-			====================Reflesh the medium and minimum cost====================
-		*/
-			//Calculation of Jmed
-			//Definition and Initialization
-			int TemSize;
-			if (kase <= SizeOfR)							TemSize = kase + 1;
-			else											TemSize = 501;
+		double TemJ[TemSize];
+		memcpy(TemJ, J + kase - TemSize + 1, sizeof(TemJ));
+		//Here I used pointer to make the copy faster
 
-			double TemJ[TemSize];
-			memcpy(TemJ, J[par] + kase - TemSize + 1, sizeof(TemJ));
-			//Here I used pointer to make the copy faster
+		Jmed = quick_sort(TemSize, TemJ);
 
-			Jmed[par] = quick_sort(TemSize, TemJ);
-
-			//Calculation of Jmin
-			if (kase == 0)		
-				Jmin[par] = J[par][kase];
-			else				
-				Jmin[par] = (Jmin[par] < J[par][kase])? Jmin[par] : J[par][kase];
+		//Calculation of Jmin
+		if (kase == 0)		
+			Jmin = J[kase];
+		else				
+			Jmin = (Jmin < J[kase])? Jmin : J[kase];
 
 
-		/*
-			====================Calculate the reinforcement value beta====================
-		*/
-			if ((Jmed[par] - Jmin[par]) < 0.000001 && (Jmed[par] - Jmin[par]) > -0.000001)
-				beta[par][kase + 1] = 0;
-			else{
-				tem = (Jmed[par] - J[par][kase]) / (Jmed[par] - Jmin[par]);
-				beta[par][kase + 1] = (tem > 0)? tem : 0;
-			}
+	/*
+		====================Calculate the reinforcement value beta====================
+	*/
+		if ((Jmed - Jmin) < 0.000001 && (Jmed - Jmin) > -0.000001)
+			beta[kase + 1] = 0;
+		else{
+			tem = (Jmed - J[kase]) / (Jmed - Jmin);
+			beta[kase + 1] = (tem > 0)? tem : 0;
+		}
 
 
-		/*
-			==========Calculate the PDF parameter alpha and get the PDF of next koop==========
-		*/
+	/*
+		==========Calculate the PDF parameter alpha and get the PDF of next koop==========
+	*/
+		for(par = 0; par < var; par ++){
 			tem = erf( (Interval[par][1] - x[par][kase]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][kase]) / (sqrt(2) * sigma[par]) );
-			tem = beta[par][kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+			tem = beta[kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
 			alpha[par][kase + 1] = 1 / (1 + tem);
-			
+		}
 
-		/*
-			===============Tem output and confident if the algorithm is right our not===============
-		*/
+	/*
+		===============Tem output and confident if the algorithm is right our not===============
+	*/
 
-			if (command == 't')
-				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", kase, z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+		if (command == 't')
+			for(par = 0; par < var; par ++)
+				printf("sb:\t%d\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", par, kase, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
 
-			if (command == 'p'){
-				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", kase, z, x[par][kase], J[par][kase], Jmed[par], Jmin[par], alpha[par][kase + 1], beta[par][kase + 1]);
+		if (command == 'p'){
+			for(par = 0; par < var; par ++){
+				printf("sb:\t%d\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", par, kase, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
 
 				double Output = 0;
 				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
@@ -344,7 +335,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 					double total = (double)1 / (Interval[par][1] - Interval[par][0]);
 					int k;
 					for(k = 0; k <= kase; k ++){
-						tem = beta[par][k + 1] * lambda[par] * exp( - pow((delta - x[par][k]), 2) / (2 * sigma[par] * sigma[par])  );
+						tem = beta[k + 1] * lambda[par] * exp( - pow((delta - x[par][k]), 2) / (2 * sigma[par] * sigma[par])  );
 						total = alpha[par][k + 1] * (total + tem);
 					}
 					Output = (double)total;
@@ -352,15 +343,15 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 					Output = 0;
 				}
 				printf("\n");
-
 			}
-
 		}
+
 	}
 
 	//Judgement, calculate the exception of PDF, and make a decision
 	//freopen("After", "w", stdout);
 	int par;
+	printf("\n");
 	for(par = 0; par < var; par ++){
 		double Output = 0;
 		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
@@ -370,7 +361,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
 			int k;
 			for(k = 1; k <= ttl; k ++){
-				tem = beta[par][k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
+				tem = beta[k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
 				total = alpha[par][k] * (total + tem);
 			}
 			Output += (double)total * LenIntervar * delta;
@@ -409,9 +400,9 @@ int main(int argc, char const *argv[]){
 	int ttl, loop;
 	double gw, gh;
 	char mode;
-	scanf("%d%d%lf%lf%c", &ttl, &loop, &gw, &gh, &mode);
+	scanf("%d%d%lf%lf%s", &ttl, &loop, &gw, &gh, &mode);
 	getchar();
-
+	
 	double Interval[ttl][2];
 	for(var = 0; var < ttl; var ++){
 		scanf("%lf%lf", &Interval[var][0], &Interval[var][1]);
