@@ -144,8 +144,9 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	//Pretreatment, Calculate lambda and sigma
 	int i;
 	for(i = 0; i < var; i ++){
-		lambda[i] = gw / (Interval[i][1] - Interval[i][0]);
-		sigma[i] = gh * (Interval[i][1] - Interval[i][0]); 
+		sigma[i] = gw * (Interval[i][1] - Interval[i][0]); 
+		lambda[i] = gh / (Interval[i][1] - Interval[i][0]);
+		
 	}
 
 
@@ -312,8 +313,11 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		for(par = 0; par < var; par ++){
 			double tem1 = erf( (Interval[par][1] - x[par][kase]) / (sqrt(2) * sigma[par]) );
 			double tem2 = erf( (Interval[par][0] - x[par][kase]) / (sqrt(2) * sigma[par]) );
-			double tem3 = beta[kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2;
-			tem = tem3 * (tem1 - tem2);
+			double tem3 = tem1 - tem2;
+			tem = beta[kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2;
+			tem = tem * tem3;
+			if (tem != 0)
+				tem -= 0.001;
 			alpha[par][kase + 1] = 1 / (1 + tem);
 			printf("PDF\t%.16f\t%.16f\t%.16f\t%.16f\t%.16f\t\n", tem1, tem2, tem3, tem, alpha[par][kase + 1]);
 		}
@@ -356,6 +360,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		double Output = 0;
 		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 		int kase;
+		/*
 		for(kase = 0; kase <= InteSize; kase ++){
 			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
 			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
@@ -367,6 +372,24 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			Output += (double)total * LenIntervar * delta;
 			
 		}
+		*/
+		double maxx = 0;
+		for(kase = 0; kase <= InteSize; kase ++){
+			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
+			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
+			int k;
+			for(k = 1; k <= ttl; k ++){
+				tem = beta[k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
+				total = alpha[par][k] * (total + tem);
+			}
+			//printf("%.16f\n", total);
+			//scanf("%d", &sb);
+			if (maxx < total){
+				Output = kase;
+				maxx = total;
+			}
+		}
+		Output = Output * (Interval[par][1] - Interval[par][0]) / InteSize + Interval[par][0];
 		printf("%0.16f\n", Output);
 
 	}
@@ -395,8 +418,8 @@ int main(int argc, char const *argv[]){
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
 	//int i;
-	//for(i = 0; i < 10; i ++)
-		Algorithm(1, 1000, 0.02, 0.3, 'p', Interval);
+	//for(i = 0; i < 100; i ++)
+		Algorithm(1, 20000, 0.02, 0.3, 'p', Interval);
 	return 0;
 }
 
