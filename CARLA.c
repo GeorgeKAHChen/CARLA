@@ -127,13 +127,20 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 	//Saving Definition
 	double x[var][ttl];					//To save all decision point
-	double J[ttl];					//To save all cost value
-	double Jmed;					//To save medium value of all J
-	double Jmin;					//To save minumum value of all J
+	double J[ttl];						//To save all cost value
+	double Jmed;						//To save medium value of all J
+	double Jmin;						//To save minumum value of all J
 	double alpha[var][ttl + 1];			//To save all PDF parameter
-	double beta[ttl + 1];			//To save all reinforcement parameter
+	double beta[ttl + 1];				//To save all reinforcement parameter
 	double lambda[var];					//To save all lambda parameter
 	double sigma[var];					//To save all sigma parameter
+
+	memset(x, 0, sizeof(x));
+	memset(J, 0, sizeof(J));
+	memset(alpha, 0, sizeof(alpha));
+	memset(beta, 0, sizeof(beta));
+	memset(lambda, 0, sizeof(lambda));
+	memset(sigma, 0, sizeof(sigma));
 
 	int positive;						//For test
 
@@ -319,7 +326,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			if (tem != 0)
 				tem -= 0.001;
 			alpha[par][kase + 1] = 1 / (1 + tem);
-			printf("PDF\t%.16f\t%.16f\t%.16f\t%.16f\t%.16f\t\n", tem1, tem2, tem3, tem, alpha[par][kase + 1]);
+			//printf("PDF\t%.16f\t%.16f\t%.16f\t%.16f\t%.16f\t\n", tem1, tem2, tem3, tem, alpha[par][kase + 1]);
 		}
 
 
@@ -327,10 +334,10 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			===============Tem output and confident if the algorithm is right our not===============
 		*/
 
-		if (command == 't' || command == 'p')
+		if (command == 't' || command == 'p'){
 			par = 0;
 			printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", positive, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
-
+		}
 		if (command == 'p'){
 			double Output = 0;
 			double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
@@ -417,9 +424,9 @@ int main(int argc, char const *argv[]){
 	double Interval[1][2];
 	Interval[0][0] = 0;
 	Interval[0][1] = 2;
-	//int i;
-	//for(i = 0; i < 100; i ++)
-		Algorithm(1, 20000, 0.02, 0.3, 'p', Interval);
+	int laji;
+	for(laji = 0; laji < 500; laji ++)
+		Algorithm(1, 2000, 0.02, 0.3, 'w', Interval);
 	return 0;
 }
 
