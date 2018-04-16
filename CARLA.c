@@ -18,7 +18,7 @@ const double pi = 3.141592653589793;
 const double e = 2.718281828459045;
 const int InteSize = 500;
 const int SizeOfR = 500;
-const double omega = 10;
+const double omega = 1000;
 
 double Cost(int var, double Parameter[var]);
 int sb;								//For test
@@ -108,6 +108,7 @@ double quick_sort(const int len, double arr[len]) {
 	return arr[(int)(len/2)];
 }
 
+
 void Algorithm(const int var, const int ttl, const double gw, const double gh, const char command, double Interval[var][2]){
 /*	
 	//Function Instruction:
@@ -129,25 +130,33 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 	//Saving Definition
 	double x[var][ttl];					//To save all decision point
-	double J[ttl];					//To save all cost value
-	double Jmed;					//To save medium value of all J
-	double Jmin;					//To save minumum value of all J
+	double J[ttl];						//To save all cost value
+	double Jmed;						//To save medium value of all J
+	double Jmin;						//To save minumum value of all J
 	double alpha[var][ttl + 1];			//To save all PDF parameter
-	double beta[ttl + 1];			//To save all reinforcement parameter
+	double beta[ttl + 1];				//To save all reinforcement parameter
 	double lambda[var];					//To save all lambda parameter
 	double sigma[var];					//To save all sigma parameter
 
+	memset(x, 0, sizeof(x));
+	memset(J, 0, sizeof(J));
+	memset(alpha, 0, sizeof(alpha));
+	memset(beta, 0, sizeof(beta));
+	memset(lambda, 0, sizeof(lambda));
+	memset(sigma, 0, sizeof(sigma));
 
-	srand(time(NULL));				//For random number getting
+	int positive;						//For test
+
+	srand(time(NULL));					//For random number getting
 	double z;							//A random number which is the PDF integral value
 	double tem;							//A temple tank for saving calculation value
-
 
 	//Pretreatment, Calculate lambda and sigma
 	int i;
 	for(i = 0; i < var; i ++){
-		lambda[i] = gw / (Interval[i][1] - Interval[i][0]);
-		sigma[i] = gh * (Interval[i][1] - Interval[i][0]); 
+		sigma[i] = gw * (Interval[i][1] - Interval[i][0]); 
+		lambda[i] = gh / (Interval[i][1] - Interval[i][0]);
+		
 	}
 
 
@@ -163,7 +172,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 	/*
 		========================Newton's Method, get x========================
-	*/		
+	*/	
 			//Definition and Initialization
 			double delta = (Interval[par][0] + Interval[par][1]) / 2;
 			double Remdelta = 0;
@@ -206,7 +215,6 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			/*Newton's Method END*/
 
 
-
 			/*Bisection Method*/
 			double Left = Interval[par][0];
 			double Right = Interval[par][1];
@@ -214,6 +222,8 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			int loop, k;
 			double FLeft, FRight, FMed;
 			
+			
+			//printf("func\t");
 			FLeft = (Left - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
 			for(k = 1; k <= kase; k ++){
 				tem = erf( (Left - x[par][k-1]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][k-1]) / (sqrt(2) * sigma[par]) );
@@ -229,8 +239,11 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 				FRight = alpha[par][k] * (FRight + tem);
 			}
 			FRight -= z;
-
+			
+			positive = 0;
 			for(loop = 0; loop < 1000; loop ++){
+				positive += 1;
+				//printf("%d\n", sb);
 				MedVal = (Left + Right) / 2;
 				double FMed = (MedVal - Interval[par][0]) / (Interval[par][1] - Interval[par][0]);
 				for(k = 1; k <= kase; k ++){
@@ -242,8 +255,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 				if((Remdelta - MedVal < 0.00000001) && (Remdelta - MedVal > -0.00000001))
 					break;
-				//printf("%f\t%f\t%f\t%f\t%f\t%f\n", Left, Right, FLeft, FRight, MedVal, FMed);
-				
+
 				Remdelta = MedVal;
 				if (FMed * FLeft < 0){
 					Right = MedVal;
@@ -257,7 +269,6 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 			x[par][kase] = MedVal;
 			/*Bisection Method END*/
-			//scanf("%d", &sb);
 		}
 	/*
 		=========================Calculate the cost J=========================
@@ -269,9 +280,10 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		for(loop = 0; loop < var; loop ++)
 			Parameter[loop] = x[loop][kase];
 
+
 		//Calculate the cost
 		J[kase] = Cost(var, Parameter);
-		
+
 	/*
 		====================Reflesh the medium and minimum cost====================
 	*/
@@ -284,7 +296,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		double TemJ[TemSize];
 		memcpy(TemJ, J + kase - TemSize + 1, sizeof(TemJ));
 		//Here I used pointer to make the copy faster
-
+		
 		Jmed = quick_sort(TemSize, TemJ);
 
 		//Calculation of Jmin
@@ -305,57 +317,59 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		}
 
 
-	/*
-		==========Calculate the PDF parameter alpha and get the PDF of next koop==========
-	*/
+		/*
+			==========Calculate the PDF parameter alpha and get the PDF of next koop==========
+		*/
 		for(par = 0; par < var; par ++){
-			tem = erf( (Interval[par][1] - x[par][kase]) / (sqrt(2) * sigma[par]) ) - erf( (Interval[par][0] - x[par][kase]) / (sqrt(2) * sigma[par]) );
-			tem = beta[kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2 * tem;
+			double tem1 = erf( (Interval[par][1] - x[par][kase]) / (sqrt(2) * sigma[par]) );
+			double tem2 = erf( (Interval[par][0] - x[par][kase]) / (sqrt(2) * sigma[par]) );
+			double tem3 = tem1 - tem2;
+			tem = beta[kase + 1] * lambda[par] * sigma[par] * sqrt(2 * pi) / 2;
+			tem = tem * tem3;
+			if (tem != 0)
+				tem -= 0.001;
 			alpha[par][kase + 1] = 1 / (1 + tem);
+			//printf("PDF\t%.16f\t%.16f\t%.16f\t%.16f\t%.16f\t\n", tem1, tem2, tem3, tem, alpha[par][kase + 1]);
 		}
 
-	/*
-		===============Tem output and confident if the algorithm is right our not===============
-	*/
 
-		if (command == 't')
+		/*
+			===============Tem output and confident if the algorithm is right our not===============
+		*/
+		if (command == 't' || command == 'p')
 			for(par = 0; par < var; par ++)
-				printf("sb:\t%d\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", par, kase, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
+				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", par, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
 
 		if (command == 'p'){
-			for(par = 0; par < var; par ++){
-				printf("sb:\t%d\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", par, kase, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
+			double Output = 0;
+			double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 
-				double Output = 0;
-				double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
-
-				int ima;
-				for(ima = 0; ima <= InteSize; ima ++){
-					double delta = (double)ima / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
-					double total = (double)1 / (Interval[par][1] - Interval[par][0]);
-					int k;
-					for(k = 0; k <= kase; k ++){
-						tem = beta[k + 1] * lambda[par] * exp( - pow((delta - x[par][k]), 2) / (2 * sigma[par] * sigma[par])  );
-						total = alpha[par][k + 1] * (total + tem);
-					}
-					Output = (double)total;
-					printf("%0.16f\t", Output);
-					Output = 0;
+			int ima;
+			for(ima = 0; ima <= InteSize; ima ++){
+				double delta = (double)ima / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
+				double total = (double)1 / (Interval[par][1] - Interval[par][0]);
+				int k;
+				for(k = 0; k <= kase; k ++){
+					tem = beta[k + 1] * lambda[par] * exp( - pow((delta - x[par][k]), 2) / (2 * sigma[par] * sigma[par])  );
+					total = alpha[par][k + 1] * (total + tem);
 				}
-				printf("\n");
+				Output = (double)total;
+				printf("%0.16f\t", Output);
+				Output = 0;
 			}
-		}
+			printf("\n");
 
+		}
 	}
 
 	//Judgement, calculate the exception of PDF, and make a decision
 	//freopen("After", "w", stdout);
 	int par;
-	printf("\n");
 	for(par = 0; par < var; par ++){
 		double Output = 0;
 		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 		int kase;
+		/*
 		for(kase = 0; kase <= InteSize; kase ++){
 			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
 			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
@@ -367,6 +381,24 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			Output += (double)total * LenIntervar * delta;
 			
 		}
+		*/
+		double maxx = 0;
+		for(kase = 0; kase <= InteSize; kase ++){
+			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
+			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
+			int k;
+			for(k = 1; k <= ttl; k ++){
+				tem = beta[k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
+				total = alpha[par][k] * (total + tem);
+			}
+			//printf("%.16f\n", total);
+			//scanf("%d", &sb);
+			if (maxx < total){
+				Output = kase;
+				maxx = total;
+			}
+		}
+		Output = Output * (Interval[par][1] - Interval[par][0]) / InteSize + Interval[par][0];
 		printf("o%0.16f\n", Output);
 
 	}
@@ -448,8 +480,10 @@ double Cost(int var, double Parameter[var]){
 	for(loc = 0; loc < 256; loc ++)
 		Total += pow((Output[loc] - Histogram[loc]), 2);
 	Total /= 256;
+	/*
 	if (Prob <= 1)					Total = Total + omega * (1 - Prob);
 	else							Total = Total + omega * (Prob - 1);
+	*/
 	return Total;
 }
 
