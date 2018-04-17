@@ -250,7 +250,8 @@ def Main2(ImageName):
 	if DEBUG:
 		print("Cluster = " + str(N_Cluster))
 
-
+	
+	"""
 	#==============================================================================
 	#Getting treasholding peak with wavelet based method and Bilter method
 	PeaksFinal = []
@@ -283,7 +284,8 @@ def Main2(ImageName):
 	if DEBUG:
 		print("Pretreatment finished")
 		print(PeaksFinal)
-	
+	"""
+
 
 	#==============================================================================
 	#Getting treasholding value with iteration and learning method
@@ -294,7 +296,7 @@ def Main2(ImageName):
 
 	PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
 	
-	PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255], [0, 255]]
+	PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255]]
 
 
 	#==============================================================================
@@ -371,7 +373,7 @@ def Main2(ImageName):
 	DataOutput.sort()
 	
 
-
+	"""
 	#==============================================================================
 	#Treasholding pretreatment
 	#Just Final step treasholding getting
@@ -410,6 +412,33 @@ def Main2(ImageName):
 	
 	if DEBUG:
 		print(Treasholding)
+	
+
+	#==============================================================================
+	#Another Ths method
+	Treasholding = [0]
+	for i in range(0, len(DataOutput) - 1):
+		Val = (DataOutput[i][0] + DataOutput[i+1][0]) / 2
+		if DEBUG:
+			Treasholding.append(Val)
+			continue
+
+		if len(Treasholding) > 1:
+			if Val - Treasholding[i] < 5:
+				continue
+			else:
+				Treasholding.append(Val)
+		else:
+			Treasholding.append(Val)
+
+	Treasholding.append(255)
+
+	if DEBUG:
+		print(Treasholding)
+	"""
+	#==============================================================================
+	#Get Ths
+
 
 
 	#==============================================================================
@@ -532,7 +561,7 @@ def Main2(ImageName):
 
 if __name__ == "__main__":
 	os.system("rm -r Output")
-	ImageName = "Figure/16.png"
+	ImageName = Constant.ImageName
 	img = np.array(Image.open(ImageName).convert("L"))
 	BlockInfo = Pretreatment.Partial(img)
 	os.system("cp -r Output Output1")

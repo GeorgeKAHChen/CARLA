@@ -1,21 +1,21 @@
 # Continuous Action Reinforcement Learning Automaton
-This program is using CARLA method in parameter learning and image processing.<br/>
+This program is using CARLA method in parameter learning.<br/>
 
-## CARLA method usage
-Build a new files, include:
-```
-import CARLA
-class Equation(CARLA):
-	def Consume(self, ImaGourp):
-		Consume function you need
+## Branch instruction
+## master
+The basic CARLA method code by C, which also will be packaged on Pypl
+## image
+Using CARLA method in image processing and image segmentation problem. The main processing of the algorithm will present in the paper.<br/>
 
-Equ = Equation([[max1, min1], [max2, min2], ...], Work Method, Total Loop, gw, gh)
-"""
-Work Method = "-t": For test. It will print final values
-Work Method = "-a": For learning Automatic. It will learning automatic and will print nothing.
-Work Method = "-p": For presentation. It will print final values and final PDF figure.
-"""
-Solution = Equ.Algorithm()
-print(Solution)
-```
-Then you can get your first CARLA method learning result.
+## Pretreatment
+master: void!!<br/>
+image: before you using this method, you need install some package, they are:<br/>
+Pillow, numpy, matplotlib, scipy, clooextions, opencv, pandas, gap_stat, sklearn<br/>
+
+## Usage
+###master
+Not sure!!
+###image
+You can change all the parameter(even include the location of file you want to work on it) in the Constant.py. All the parameter you can choose is given in this function<br/>
+After variable confident, you can begin the program with<br/>
+python3 Main.py<br/>
