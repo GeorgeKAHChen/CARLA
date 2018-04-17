@@ -322,3 +322,11 @@ def Recovery(BlockSize, BlockInfo, ImageName):
 				img[FigSize * BlockInfo[kase][0] + i][FigSize * BlockInfo[kase][1] + j] = img1[i][j]
 	Output(img, ImageName, 2)
 
+
+
+def HistSmooth(HisArr):
+	return np.convolve(HisArr, Constant.GauKernel, mode='full')
+
+
+
+	

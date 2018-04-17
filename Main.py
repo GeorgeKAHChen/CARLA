@@ -222,7 +222,7 @@ def Main2(ImageName):
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
-
+	Histogram = Pretreatment.HistSmooth(Histogram)
 	
 	#Gap statistic data
 	optimalK = OptimalK(parallel_backend = 'joblib')
@@ -239,8 +239,8 @@ def Main2(ImageName):
 	
 	#==============================================================================
 	#Gap statistic and judgement	
-	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
-	#N_Cluster = 3
+	#N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
+	N_Cluster = 3
 	
 	if N_Cluster < 2:
 		N_Cluster = 2
@@ -352,7 +352,7 @@ def Main2(ImageName):
 	#Read the output file
 	FileName = "Output.out"
 	File = open(FileName, "r")
-	DataOutput = []
+	Data = []
 	while 1:
 		FileLine = File.readline()
 		if not FileLine:
@@ -362,30 +362,54 @@ def Main2(ImageName):
 			TemStr = ""
 			for i in range(1, len(FileLine)):
 				TemStr += FileLine[i]
-			DataOutput.append(float(TemStr))
+			Data.append(float(TemStr))
 
+	DataOutput = []
+	for i in range(0, int(len(Data) / 3 + 0.1)):
+		tem = [Data[3 * i + 2], Data[3 * i], Data[3 * i + 1]]
+		DataOutput.append(tem)
+	DataOutput.sort()
 	
+
+
 	#==============================================================================
 	#Treasholding pretreatment
 	#Just Final step treasholding getting
-	Values = [[0.00 for n in range(255)] for n in range(len(DataOutput) / 3)]
-	for i in range(0, 256):
-		for j in range(0, len(DataOutput) / 3):
-			Pr = DataOutput[3 * j]
-			Sigma = DataOutput[3 * j + 1]
-			Mu = DataOutput[3 * j + 2]
-			Values[i][j] = Pr / (math.sqrt(2 * pi) * Sigma * Sigma) * math.exp(- pow(i - Mu, 2) / (2 * Sigma * Sigma))
-
+	Values = [[0.00 for n in range(255)] for n in range(len(DataOutput))]
+	for i in range(0, len(DataOutput)):
+		Pr = DataOutput[i][1]
+		Sigma = DataOutput[i][2]
+		Mu = DataOutput[i][0]
+		for j in range(0, 255):
+			Values[i][j] = Pr / (math.sqrt(2 * math.pi) * Sigma * Sigma) * math.exp(- pow(j - Mu, 2) / (2 * Sigma * Sigma))
+	
+	#Init.ArrOutput(Values, 1)
 
 
 	#==============================================================================
 	#Get the treasholding valus
 	Treasholding = [0]
+	j = 0
+	for i in range(1, 255):
+		print(j)
+		if Values[j + 1][i] > Values[j][i]:
+			if len(Treasholding) != 1:
+				if j - Treasholding[len(Treasholding) - 1] < 3:
+					pass
+				else:
+					Treasholding.append(i - 0.5)
+			else:
+				Treasholding.append(i - 0.5)
 
-	for i in range(0, int(((len(DataOutput)) - 1) / 3)):
-		Treasholding.append((DataOutput[i * 3 + 2] + DataOutput[i * 3 + 5]) / 2)
-
+			if j != len(DataOutput) - 2:	
+				j += 1
+				continue
+			else:
+				break
 	Treasholding.append(255)
+	
+	if DEBUG:
+		print(Treasholding)
 
 
 	#==============================================================================

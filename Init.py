@@ -289,7 +289,7 @@ def ArrOutput(Arr, Mode):
 			elif Mode == 1:
 				Str += ", "
 		if Mode == 0:
-			Str += ""
+			Str += "\n"
 		elif Mode == 1:
 			Str += "]\n["
 	File.write(Str)
