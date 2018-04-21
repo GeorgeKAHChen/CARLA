@@ -294,9 +294,9 @@ def Main2(ImageName):
 	for i in range(0, len(PeaksFinal)):
 		PairOfZC.append([PeaksFinal[i] - 1, PeaksFinal[i]])
 
-	PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
+	#PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
 	
-	PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255], [0, 255], [0, 255]]
+	PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255], [0, 255]]
 
 	
 	#==============================================================================
@@ -561,7 +561,7 @@ def Main2(ImageName):
 	#==============================================================================
 
 
-
+"""
 if __name__ == "__main__":
 	os.system("rm -r Output")
 	ImageName = Constant.ImageName
@@ -587,7 +587,7 @@ if __name__ == "__main__":
 		Pretreatment.Output(Subimg, "Block_" + str(i) + ".png", 1) 
 	Pretreatment.Recovery(len(BlockInfo), BlockInfo, "Out.jpg")
 
-
-#ImageName = Constant.ImageName
-#Pretreatment.Output(Main2(ImageName), "Block_" + str(1) + ".png", 1) 
+"""
+ImageName = Constant.ImageName
+Pretreatment.Output(Main2(ImageName), "Block_" + str(1) + ".png", 1) 
 

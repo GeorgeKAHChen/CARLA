@@ -46,12 +46,12 @@ GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
 
 #==============================================================================
 #File choosing
-ImageName = "Figure/Inp1.jpg"
+ImageName = "Figure/18.png"
 #This is the file you want the algorithm working on it.
 
 
 #==============================================================================
 #The number of segmentation
-SegVar = 6
+SegVar = 3
 #1 means auto(With Gap Statistic)
 #in N*
