@@ -222,36 +222,35 @@ def Main2(ImageName):
 
 	#Get Histogram
 	Histogram = Pretreatment.Histogram(img)
-	Histogram = Pretreatment.HistSmooth(Histogram)
+	#Histogram = Pretreatment.HistSmooth(Histogram)
 	
-	#Gap statistic data
-	optimalK = OptimalK(parallel_backend = 'joblib')
-	ClusterSet = []
-	for i in range(0, len(img)):
-		for j in range(0, len(img[i])):
-			ClusterSet.append([float(img[i][j])])
-	ClusterSet = np.array(ClusterSet)
 
-	if DEBUG:
-		print("Block size = " + str(len(ClusterSet)))
-	#print(ClusterSet)
 
-	
 	#==============================================================================
 	#Gap statistic and judgement	
-	#N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
-	N_Cluster = 3
+	N_Cluster = 0
+	if Constant.SegVar == 1:
+		optimalK = OptimalK(parallel_backend = 'joblib')
+		ClusterSet = []
+		for i in range(0, len(img)):
+			for j in range(0, len(img[i])):
+				ClusterSet.append([float(img[i][j])])
+		ClusterSet = np.array(ClusterSet)
+		N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
+		if N_Cluster < 3:
+			N_Cluster = 3
+		elif N_Cluster > 6:
+			N_Cluster = 6
+	else:
+		N_Cluster = Constant.SegVar
 	
-	if N_Cluster < 2:
-		N_Cluster = 2
-	elif N_Cluster > 5:
-		N_Cluster = 5
+
 	
 	if DEBUG:
 		print("Cluster = " + str(N_Cluster))
 
 	
-	"""
+	
 	#==============================================================================
 	#Getting treasholding peak with wavelet based method and Bilter method
 	PeaksFinal = []
@@ -263,10 +262,7 @@ def Main2(ImageName):
 			PeaksFinal = signal.find_peaks_cwt(Histogram, np.arange(1, size[2]))
 			peaks[2] = len(PeaksFinal)
 		
-		if peaks[0] - peaks[1] <= 1:
-			break
-
-		if peaks[2] == N_Cluster:
+		if size[1] - size[0] <= 1 or peaks[2] == N_Cluster or peaks[0] < N_Cluster or peaks[1] > N_Cluster:
 			break
 
 		if peaks[0] > N_Cluster and peaks[2] < N_Cluster:
@@ -281,10 +277,14 @@ def Main2(ImageName):
 			peaks[0] = peaks[2]
 			continue
 
+	if PeaksFinal[0] == 0:
+		PeaksFinal[0] = 1
+	if PeaksFinal[len(PeaksFinal)-1] == 255:
+		PeaksFinal[len(PeaksFinal)-1] = 254
 	if DEBUG:
 		print("Pretreatment finished")
 		print(PeaksFinal)
-	"""
+	
 
 
 	#==============================================================================
@@ -296,9 +296,9 @@ def Main2(ImageName):
 
 	PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
 	
-	PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255]]
+	PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255], [0, 255], [0, 255]]
 
-
+	
 	#==============================================================================
 	#MAIN ALGORIHTM
 	#==============================================================================
@@ -365,7 +365,8 @@ def Main2(ImageName):
 			for i in range(1, len(FileLine)):
 				TemStr += FileLine[i]
 			Data.append(float(TemStr))
-
+	
+	"""
 	DataOutput = []
 	for i in range(0, int(len(Data) / 3 + 0.1)):
 		tem = [Data[3 * i + 2], Data[3 * i], Data[3 * i + 1]]
@@ -373,7 +374,7 @@ def Main2(ImageName):
 	DataOutput.sort()
 	
 
-	"""
+	
 	#==============================================================================
 	#Treasholding pretreatment
 	#Just Final step treasholding getting
@@ -438,7 +439,9 @@ def Main2(ImageName):
 	"""
 	#==============================================================================
 	#Get Ths
-
+	Treasholding = []
+	for i in range(0, int(len(Data) / 3 + 0.1)):
+		Treasholding.append(Data[3 * i + 2])
 
 
 	#==============================================================================
@@ -575,16 +578,16 @@ if __name__ == "__main__":
 		for p in range(0, len(Subimg)):
 			for q in range(0, len(Subimg[p])):
 				Subimg[p][q] = min(max(int(Subimg[p][q]), 0), 255)
-		"""
-		circles1 = cv2.HoughCircles(Subimg, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=30, minRadius=200, maxRadius=300)
-		circles = circles1[0, :, :]
-		for i in circles[:]: 
-			cv2.circle(img, (i[0], i[1]), i[2], 128, 5)
-		"""
+		
+		#circles1 = cv2.HoughCircles(Subimg, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=30, minRadius=200, maxRadius=300)
+		#circles = circles1[0, :, :]
+		#for i in circles[:]: 
+		#	cv2.circle(img, (i[0], i[1]), i[2], 128, 5)
+		
 		Pretreatment.Output(Subimg, "Block_" + str(i) + ".png", 1) 
 	Pretreatment.Recovery(len(BlockInfo), BlockInfo, "Out.jpg")
 
 
-
-
+#ImageName = Constant.ImageName
+#Pretreatment.Output(Main2(ImageName), "Block_" + str(1) + ".png", 1) 
 
