@@ -328,5 +328,26 @@ def HistSmooth(HisArr):
 	return np.convolve(HisArr, Constant.GauKernel, mode='full')
 
 
+def CombineFigures(img1, img2, model):
+	#This function will combine two figures in different RGB channel
+	#Where img1 is initial image, img2 is boundary image
+	#Also, if model = 1, means background is 255 and 0 means 0
+	img = []
+	Judge = 0
+	if model == 1:
+		Judge = 255
+	for i in range(0, len(img2)):
+		imgLine = []
+		for j in range(0, len(img2[i])):
+			if img2[i][j] != Judge:
+				imgLine.append([255, 0, 0])
+			else:
+				imgLine.append([img1[i][j], img1[i][j], img1[i][j]])
+		img.append(imgLine)
+	#Init.ArrOutput(img, 1)
+	return np.array(img)
+
+
+
 
 	

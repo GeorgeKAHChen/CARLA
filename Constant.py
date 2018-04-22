@@ -51,8 +51,61 @@ ImageName = "Figure/18.png"
 
 
 #==============================================================================
-#The number of segmentation
-SegVar = 3
+#The number of clusters
+SegVar = 2
 #1 means auto(With Gap Statistic)
 #0 means auto(With Zero crossing)
 #in N*
+
+
+#==============================================================================
+#Learning model
+LearnModel = "all"
+#"all" means learning all 3K parameter
+#"part" means learning only 2K parameter
+
+
+
+
+#==============================================================================
+#Parameter check, DO NOT CHANGE THIS FUCNTION
+def ParameterDetermine():
+	#This function will determine all parameter is legal or not
+	#Parameter of CARLA
+	import os
+	NoError = True
+	if mode != "w" and mode and "p" and mode != "t":
+		print("Working method error")
+		NoError = False
+
+	if DEBUG == True:
+		print("CAUTION: DEBUG MODEL")
+
+	if Tsukaikata != "F" and Tsukaikata != "M":
+		print("Problem method error")
+		NoError = False
+
+	if not os.path.exists(ImageName):
+		print("File not exist")
+		NoError = False
+
+	try:
+		tem = str(SegVar)
+		int(tem)
+	except:
+		print("Cluster value error")
+		NoError = False
+
+	if SegVar < 0:
+		print("Cluster value error")
+		NoError = False
+
+	if LearnModel == "all" and SegVar == 0:
+		print("Cluster value error, Learning all parameter cannot have 0 cluster")
+		NoError = False
+	
+	if LearnModel != "all" and LearnModel != "part":
+		print("CARLA learning error")
+		NoError = False
+
+	return NoError

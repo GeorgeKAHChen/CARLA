@@ -21,6 +21,11 @@ from PIL import ImageFilter
 import cv2
 from copy import deepcopy
 import random
+import pandas as pd
+from gap_statistic import OptimalK
+from sklearn.datasets.samples_generator import make_blobs
+from sklearn.cluster import KMeans
+
 
 #import files
 import Init
@@ -31,11 +36,16 @@ DEBUG = Constant.DEBUG
 
 
 def Main2(ImageName):
-	import pandas as pd
-	from gap_statistic import OptimalK
-	from sklearn.datasets.samples_generator import make_blobs
-	from sklearn.cluster import KMeans
+	#==============================================================================
+	#Parameter check and import package
+	if Constant.ParameterDetermine() == False:
+		return
 
+	AnaLine = ""
+	#For output with matlab
+
+
+	
 	#==============================================================================
 	#Pretreatments
 	#==============================================================================
@@ -53,7 +63,11 @@ def Main2(ImageName):
 	Histogram = Pretreatment.Histogram(img)
 	#Histogram = Pretreatment.HistSmooth(Histogram)
 	
-	
+	if DEBUG:
+		AnaLine += "His = "
+		AnaLine += str(Histogram)
+		AnaLine += "\n"
+
 
 	#==============================================================================
 	#Initial of CARLA
@@ -80,73 +94,79 @@ def Main2(ImageName):
 		
 
 	else:
+		N_Cluster = 0
 		#==============================================================================
 		#Gap statistic and judgement	
-		N_Cluster = 0
-		if Constant.SegVar == 1:
-			optimalK = OptimalK(parallel_backend = 'joblib')
-			ClusterSet = []
-			for i in range(0, len(img)):
-				for j in range(0, len(img[i])):
-					ClusterSet.append([float(img[i][j])])
-			ClusterSet = np.array(ClusterSet)
-			N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
-			if N_Cluster < 3:
-				N_Cluster = 3
-			elif N_Cluster > 6:
-				N_Cluster = 6
-		else:
-			N_Cluster = Constant.SegVar
+		if Constant.LearnModel == "part":
+			if Constant.SegVar == 1:
+				optimalK = OptimalK(parallel_backend = 'joblib')
+				ClusterSet = []
+				for i in range(0, len(img)):
+					for j in range(0, len(img[i])):
+						ClusterSet.append([float(img[i][j])])
+				ClusterSet = np.array(ClusterSet)
+				N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
+				if N_Cluster < 3:
+					N_Cluster = 3
+				elif N_Cluster > 6:
+					N_Cluster = 6
+			else:
+				N_Cluster = Constant.SegVar
+			
 		
-	
-		if DEBUG:
-			print("Cluster = " + str(N_Cluster))
+			if DEBUG:
+				print("Cluster = " + str(N_Cluster))
 
-	
+		
 		#==============================================================================
 		#Getting treasholding peak with wavelet based method and Bilter method
-		PeaksFinal = []
-		size = [2, 256, 128]
-		peaks = [len(signal.find_peaks_cwt(Histogram, np.arange(1,2))), len(signal.find_peaks_cwt(Histogram, np.arange(1,256))), 0]
+			PeaksFinal = []
+			size = [2, 256, 128]
+			peaks = [len(signal.find_peaks_cwt(Histogram, np.arange(1,2))), len(signal.find_peaks_cwt(Histogram, np.arange(1,256))), 0]
 
-		while 1:
-			if peaks[0] > N_Cluster and peaks[1] < N_Cluster:
-				PeaksFinal = signal.find_peaks_cwt(Histogram, np.arange(1, size[2]))
-				peaks[2] = len(PeaksFinal)
+			while 1:
+				if peaks[0] > N_Cluster and peaks[1] < N_Cluster:
+					PeaksFinal = signal.find_peaks_cwt(Histogram, np.arange(1, size[2]))
+					peaks[2] = len(PeaksFinal)
+				
+				if size[1] - size[0] <= 1 or peaks[2] == N_Cluster or peaks[0] < N_Cluster or peaks[1] > N_Cluster:
+					break
+
+				if peaks[0] > N_Cluster and peaks[2] < N_Cluster:
+					size[1] = size[2]
+					size[2] = int((size[0] + size[1]) / 2)
+					peaks[1] = peaks[2]
+					continue
+				
+				if peaks[1] < N_Cluster and peaks[2] > N_Cluster:
+					size[0] = size[2]
+					size[2] = int((size[0] + size[1]) / 2)
+					peaks[0] = peaks[2]
+					continue
+
+			if PeaksFinal[0] == 0:
+				PeaksFinal[0] = 1
+			if PeaksFinal[len(PeaksFinal)-1] == 255:
+				PeaksFinal[len(PeaksFinal)-1] = 254
+			if DEBUG:
+				print("Pretreatment finished")
+				print(PeaksFinal)
 			
-			if size[1] - size[0] <= 1 or peaks[2] == N_Cluster or peaks[0] < N_Cluster or peaks[1] > N_Cluster:
-				break
-
-			if peaks[0] > N_Cluster and peaks[2] < N_Cluster:
-				size[1] = size[2]
-				size[2] = int((size[0] + size[1]) / 2)
-				peaks[1] = peaks[2]
-				continue
-			
-			if peaks[1] < N_Cluster and peaks[2] > N_Cluster:
-				size[0] = size[2]
-				size[2] = int((size[0] + size[1]) / 2)
-				peaks[0] = peaks[2]
-				continue
-
-		if PeaksFinal[0] == 0:
-			PeaksFinal[0] = 1
-		if PeaksFinal[len(PeaksFinal)-1] == 255:
-			PeaksFinal[len(PeaksFinal)-1] = 254
-		if DEBUG:
-			print("Pretreatment finished")
-			print(PeaksFinal)
-		
 
 
 		#==============================================================================
 		#Getting treasholding value with iteration and learning method
-		for i in range(0, len(PeaksFinal)):
-			PairOfZC.append([PeaksFinal[i] - 1, PeaksFinal[i]])
+			for i in range(0, len(PeaksFinal)):
+				PairOfZC.append([PeaksFinal[i] - 1, PeaksFinal[i]])
 
-		PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
-		
-		#PairOfZC = [[0, 255], [0, 255], [0, 255], [0, 255], [0, 255]]
+			PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
+
+
+		#==============================================================================
+		#No pretreatment, just learn all parameter
+		elif Constant.LearnModel == "all":
+			for i in range(0, Constant.SegVar):
+				PairOfZC = PairOfZC.append([0, 255])
 
 
 
@@ -218,6 +238,10 @@ def Main2(ImageName):
 				TemStr += FileLine[i]
 			Data.append(float(TemStr))
 	
+	if DEBUG:
+		AnaLine += "tem = "
+		AnaLine += str(Data)
+		AnaLine += "\n"
 	"""
 	DataOutput = []
 	for i in range(0, int(len(Data) / 3 + 0.1)):
@@ -295,7 +319,14 @@ def Main2(ImageName):
 	for i in range(0, int(len(Data) / 3 + 0.1)):
 		Treasholding.append(Data[3 * i + 2])
 
-
+	if DEBUG:
+		AnaLine += "ths = "
+		AnaLine += str(Treasholding)
+		AnaLine += "\n"
+		FileName = "SaveArrTem"
+		File = open(FileName, "w")
+		File.write(AnaLine)
+		File.close()
 	#==============================================================================
 	#Figure Segmentation
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
@@ -323,6 +354,8 @@ def Main2(ImageName):
 	#==============================================================================
 	#Factory output
 	if Constant.Tsukaikata == "F":
+		OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
+		misc.imsave("Saving/result.png", OutImg)
 		return OutImg
 	#==============================================================================
 	#==============================================================================
@@ -443,5 +476,5 @@ if __name__ == "__main__":
 
 """
 ImageName = Constant.ImageName
-Pretreatment.Output(Main2(ImageName), "Block_" + str(1) + ".png", 1) 
+Main2(ImageName)
 
