@@ -54,4 +54,5 @@ ImageName = "Figure/18.png"
 #The number of segmentation
 SegVar = 3
 #1 means auto(With Gap Statistic)
+#0 means auto(With Zero crossing)
 #in N*
