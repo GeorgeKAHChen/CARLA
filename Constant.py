@@ -5,9 +5,13 @@
 #		Constant.py
 #
 ############################################################
+#Here are all parameter you can change during all the CARLA processing
+#CAUTION: DO NOT CHANGE THE PARAMETER CHECK FUNCTION
+
 
 #==============================================================================
-#Parameter of CARLA
+#Parameter of main CARLA processing
+#Usually let gw = 0.02, gh = 0.3 and Loop = 2000 in paper
 gw = 0.02
 gh = 0.3
 Loop = 2000
@@ -42,6 +46,7 @@ Tsukaikata = "F"
 #Histogram smoothing kernel
 GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
 #This is a group sample Gaussian kernel with sigma = 1.00
+#To smoothing the histogram figure
 
 
 #==============================================================================
@@ -52,7 +57,7 @@ ImageName = "Figure/18.png"
 
 #==============================================================================
 #The number of clusters
-SegVar = 2
+SegVar = 4
 #1 means auto(With Gap Statistic)
 #0 means auto(With Zero crossing)
 #in N*

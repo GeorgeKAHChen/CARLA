@@ -45,7 +45,7 @@ def Main2(ImageName):
 	#For output with matlab
 
 
-	
+
 	#==============================================================================
 	#Pretreatments
 	#==============================================================================
@@ -166,7 +166,7 @@ def Main2(ImageName):
 		#No pretreatment, just learn all parameter
 		elif Constant.LearnModel == "all":
 			for i in range(0, Constant.SegVar):
-				PairOfZC = PairOfZC.append([0, 255])
+				PairOfZC.append([0, 255])
 
 
 
@@ -327,6 +327,8 @@ def Main2(ImageName):
 		File = open(FileName, "w")
 		File.write(AnaLine)
 		File.close()
+
+
 	#==============================================================================
 	#Figure Segmentation
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
