@@ -109,7 +109,7 @@ double quick_sort(const int len, double arr[len]) {
 }
 
 
-void Algorithm(const int var, const int ttl, const double gw, const double gh, const char command, double Interval[var][2]){
+void Algorithm(const int var, const int ttl, const double gw, const double gh, const char command, double Interval[var][2], double Muse[var / 2]){
 /*	
 	//Function Instruction:
 	This function is main function of CARLA Method.
@@ -282,7 +282,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 
 		//Calculate the cost
-		J[kase] = Cost(var, Parameter);
+		J[kase] = Cost(var, Parameter, Muse);
 
 	/*
 		====================Reflesh the medium and minimum cost====================
@@ -435,19 +435,23 @@ int main(int argc, char const *argv[]){
 	scanf("%d%d%lf%lf%s", &ttl, &loop, &gw, &gh, &mode);
 	getchar();
 	
-	double Interval[ttl][2];
+	double Interval[ttl / 3 * 2][2];
+	double Muse[ttl / 3];
 	for(var = 0; var < ttl; var ++){
-		scanf("%lf%lf", &Interval[var][0], &Interval[var][1]);
+		if (var % 3 == 2)
+			scanf("%lf", &Muse[(int)(var / 3)]);
+		else:
+			scanf("%lf%lf", &Interval[((int)(par / 3)) * 2 + par % 3][0], &Interval[((int)(par / 3)) * 2 + par % 3][1]);
 		getchar();
 	}
 	
-	Algorithm(ttl, loop, gw, gh, mode, Interval);
+	Algorithm(ttl / 3 * 2, loop, gw, gh, mode, Interval, Muse);
 	
 	return 0;
 }
 
 
-double Cost(int var, double Parameter[var]){
+double Cost(int var, double Parameter[var], double Muse[var / 2]){
 /*	
 	//Function Instruction:
 	This function will return cost in different situation, which you can change it.
@@ -465,9 +469,9 @@ double Cost(int var, double Parameter[var]){
 	//SOME ERROR IN THIS PART OF CODE
 	for(par = 0; par < var / 3; par ++){
 		double Pr, Sigma, Mu;
-		Pr = Parameter[3 * par];
-		Sigma = Parameter[3 * par + 1];
-		Mu = Parameter[3 * par + 2];
+		Pr = Parameter[2 * par];
+		Sigma = Parameter[2 * par + 1];
+		Mu = Muse[par];
 		for(loc = 0; loc < 256; loc ++){
 			//0: Prob, 1: sigma, 2: mu
 			Prob += Pr;
