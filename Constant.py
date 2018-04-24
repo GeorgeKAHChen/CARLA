@@ -37,7 +37,7 @@ DEBUG = True
 
 #==============================================================================
 #Problem method
-Tsukaikata = "F"
+Tsukaikata = "M"
 #F = factory image processing(don't need pixel choose)
 #M = medicine image processing(need pixel choose and just get boundary of that block)
 
@@ -51,13 +51,13 @@ GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
 
 #==============================================================================
 #File choosing
-ImageName = "Figure/18.png"
+ImageName = "Figure/15.png"
 #This is the file you want the algorithm working on it.
 
 
 #==============================================================================
 #The number of clusters
-SegVar = 4
+SegVar = 2
 #1 means auto(With Gap Statistic)
 #0 means auto(With Zero crossing)
 #in N*
@@ -65,9 +65,16 @@ SegVar = 4
 
 #==============================================================================
 #Learning model
-LearnModel = "all"
+LearnModel = "part"
 #"all" means learning all 3K parameter
 #"part" means learning only 2K parameter
+
+
+#==============================================================================
+#ths model
+ThsModel = "ave"
+#"ave" means using the average location of mu
+#"var" means Judge with the value of all function
 
 
 

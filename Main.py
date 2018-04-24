@@ -242,84 +242,82 @@ def Main2(ImageName):
 		AnaLine += "tem = "
 		AnaLine += str(Data)
 		AnaLine += "\n"
-	"""
+
+
+
+
+	#==============================================================================
+	#Treasholding solution	
+	#==============================================================================
+	Treasholding = [0]
 	DataOutput = []
 	for i in range(0, int(len(Data) / 3 + 0.1)):
 		tem = [Data[3 * i + 2], Data[3 * i], Data[3 * i + 1]]
 		DataOutput.append(tem)
 	DataOutput.sort()
-	
-
-	
-	#==============================================================================
-	#Treasholding pretreatment
-	#Just Final step treasholding getting
-	Values = [[0.00 for n in range(255)] for n in range(len(DataOutput))]
-	for i in range(0, len(DataOutput)):
-		Pr = DataOutput[i][1]
-		Sigma = DataOutput[i][2]
-		Mu = DataOutput[i][0]
-		for j in range(0, 255):
-			Values[i][j] = Pr / (math.sqrt(2 * math.pi) * Sigma * Sigma) * math.exp(- pow(j - Mu, 2) / (2 * Sigma * Sigma))
-	
-	#Init.ArrOutput(Values, 1)
 
 
-	#==============================================================================
-	#Get the treasholding valus
-	Treasholding = [0]
-	j = 0
-	for i in range(1, 255):
-		print(j)
-		if Values[j + 1][i] > Values[j][i]:
-			if len(Treasholding) != 1:
-				if j - Treasholding[len(Treasholding) - 1] < 3:
-					pass
+
+	if Constant.ThsModel == "var":
+		#==============================================================================
+		#Treasholding pretreatment
+		#Just Final step treasholding getting
+		Values = [[0.00 for n in range(255)] for n in range(len(DataOutput))]
+		for i in range(0, len(DataOutput)):
+			Pr = DataOutput[i][1]
+			Sigma = DataOutput[i][2]
+			Mu = DataOutput[i][0]
+			for j in range(0, 255):
+				Values[i][j] = Pr / (math.sqrt(2 * math.pi) * Sigma * Sigma) * math.exp(- pow(j - Mu, 2) / (2 * Sigma * Sigma))
+	
+		#Init.ArrOutput(Values, 1)
+
+
+		#==============================================================================
+		#Get the treasholding valus
+		j = 0
+		for i in range(1, 255):
+			print(j)
+			if Values[j + 1][i] > Values[j][i]:
+				if len(Treasholding) != 1:
+					if j - Treasholding[len(Treasholding) - 1] < 3:
+						pass
+					else:
+						Treasholding.append(i - 0.5)
 				else:
 					Treasholding.append(i - 0.5)
-			else:
-				Treasholding.append(i - 0.5)
 
-			if j != len(DataOutput) - 2:	
-				j += 1
-				continue
-			else:
-				break
-	Treasholding.append(255)
+				if j != len(DataOutput) - 2:	
+					j += 1
+					continue
+				else:
+					break
+		Treasholding.append(255)
+		
 	
-	if DEBUG:
-		print(Treasholding)
-	
-
-	#==============================================================================
-	#Another Ths method
-	Treasholding = [0]
-	for i in range(0, len(DataOutput) - 1):
-		Val = (DataOutput[i][0] + DataOutput[i+1][0]) / 2
-		if DEBUG:
-			Treasholding.append(Val)
-			continue
-
-		if len(Treasholding) > 1:
-			if Val - Treasholding[i] < 5:
+	elif Constant.ThsModel == "ave":
+		#==============================================================================
+		#Another Ths method
+		for i in range(0, len(DataOutput) - 1):
+			Val = (DataOutput[i][0] + DataOutput[i+1][0]) / 2
+			if DEBUG:
+				Treasholding.append(Val)
 				continue
+
+			if len(Treasholding) > 1:
+				if Val - Treasholding[i] < 5:
+					continue
+				else:
+					Treasholding.append(Val)
 			else:
 				Treasholding.append(Val)
-		else:
-			Treasholding.append(Val)
 
-	Treasholding.append(255)
+		Treasholding.append(255)
+
+
 
 	if DEBUG:
 		print(Treasholding)
-	"""
-	#==============================================================================
-	#Get Ths
-	Treasholding = []
-	for i in range(0, int(len(Data) / 3 + 0.1)):
-		Treasholding.append(Data[3 * i + 2])
-
-	if DEBUG:
 		AnaLine += "ths = "
 		AnaLine += str(Treasholding)
 		AnaLine += "\n"
@@ -355,12 +353,16 @@ def Main2(ImageName):
 
 	#==============================================================================
 	#Factory output
+	#==============================================================================
 	if Constant.Tsukaikata == "F":
 		OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
 		misc.imsave("Saving/result.png", OutImg)
 		return OutImg
 	#==============================================================================
 	#==============================================================================
+
+
+
 
 
 	#==============================================================================
@@ -373,7 +375,6 @@ def Main2(ImageName):
 		plt.imshow(img, cmap="gray")
 		plt.axis("off")
 		plt.show()
-		input("Press Enter to continue")
 
 		PointY = Init.IntInput("Input location X = ", "0", "999999999", "int")
 		PointX = Init.IntInput("Input location Y = ", "0", "999999999", "int")
@@ -425,26 +426,21 @@ def Main2(ImageName):
 
 		#==============================================================================
 		#Boundary Print
+		OutImg = [[0 for n in range(len(img[1]))] for n in range(len(img))]
 		for p in range(0, len(OutImg)):
 			for q in range(0, len(OutImg[p])):
 				if AnoImg[p][q] == 255:
-					img[p][q] = 255
-
-		if DEBUG:
-			plt.imshow(AnoImg, cmap="gray")
-			plt.axis("off")
-			plt.show()
-			input("Press Enter to continue")
+					OutImg[p][q] = 0
+				else:
+					OutImg[p][q] = 255
 
 
 		#==============================================================================
 		#Output the figure
-		plt.imshow(img, cmap="gray")
-		plt.axis("off")
-		plt.show()
-		input("Press Enter to continue")
-
+		OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
+		misc.imsave("Saving/result.png", OutImg)
 		return OutImg
+
 
 	#==============================================================================
 	#==============================================================================
