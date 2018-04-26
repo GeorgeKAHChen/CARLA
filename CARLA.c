@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <memory.h>
+#include <Python.h>  
 
 
 const double pi = 3.141592653589793;
@@ -20,9 +21,6 @@ const int InteSize = 500;
 const int SizeOfR = 500;
 const double omega = 1000;
 
-double Cost(int var, double Parameter[var]);
-int sb;								//For test and debug
-double Histogram[256];
 
 /*===================DO NOT CHANGE ANYTHING BELOW===================*/
 
@@ -273,7 +271,6 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	/*
 		=========================Calculate the cost J=========================
 	*/
-
 		//Get the parameter group at present.
 		double Parameter[var];
 		int loop;
@@ -281,8 +278,78 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 			Parameter[loop] = x[loop][kase];
 
 
-		//Calculate the cost
-		J[kase] = Cost(var, Parameter);
+		//import python function - Initial
+		Py_Initialize();
+		
+		//Determine the initialization is successful or not
+		if(!Py_IsInitialized()){
+			printf("Python init failed!\n");
+			return ;
+		}
+		
+		//import location
+		PyRun_SimpleString("import sys");
+		PyRun_SimpleString("sys.path.append('./')");
+
+		//variable initial
+		PyObject *pName = NULL;
+		PyObject *pModule = NULL;
+		PyObject *pDict = NULL;
+		PyObject *pFunc = NULL;
+		PyObject *pArgs = NULL;
+
+
+		//import File (CAUTION: FileName without .py)
+		pName = PyString_FromString("Constant");
+		pModule = PyImport_Import(pName);
+		if(!pModule) {
+			printf("Load Constant.py failed!\n");
+			getchar();
+			return ;
+		}
+		
+		pDict = PyModule_GetDict(pModule);
+		if(!pDict) {
+			printf("Can't find dictionary in Constant.py!\n");
+			return ;
+		}
+
+		//import Function
+		pFunc = PyDict_GetItemString(pDict,"Cost");
+		if(!pFunc || !PyCallable_Check(pFunc)) {
+			printf("Can't find function!\n");
+			getchar();
+			return ;
+		}
+
+		//Tuple build, and give parameter for learning
+		pArgs = PyTuple_New(1);
+		PyObject* list = PyList_New(0);
+		for (par = 0; par < var; par ++){
+
+			printf("%.16f\n", x[par][kase]);
+			PyList_Append(list, Py_BuildValue("d", x[par][kase])); //DEBUG!!!
+
+		}
+		PyTuple_SetItem(pArgs, 0, list);
+
+		
+		//Using the function
+		PyObject* pyRet = PyObject_CallObject(pFunc, pArgs);
+		
+		//Get the cost result
+		double cnmb;
+		PyArg_Parse(pyRet, "d", &J[kase]);
+		printf("%.16f\n", J[kase]);
+		
+		//Clear
+		if(pName)				Py_DECREF(pName);
+		if(pArgs)				Py_DECREF(pArgs);
+		if(pModule)				Py_DECREF(pModule);
+
+		//Close python functin
+		Py_Finalize();
+
 
 	/*
 		====================Reflesh the medium and minimum cost====================
@@ -338,7 +405,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		*/
 		if (command == 't' || command == 'p')
 			for(par = 0; par < var; par ++)
-				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", par, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
+				printf("sb:\t%d\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t%0.16f\t\n", kase, z, x[par][kase], J[kase], Jmed, Jmin, alpha[par][kase + 1], beta[kase + 1]);
 
 		if (command == 'p'){
 			double Output = 0;
@@ -363,25 +430,11 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	}
 
 	//Judgement, calculate the exception of PDF, and make a decision
-	//freopen("After", "w", stdout);
 	int par;
 	for(par = 0; par < var; par ++){
 		double Output = 0;
 		double LenIntervar = (double)1 / InteSize * (Interval[par][1] - Interval[par][0]);
 		int kase;
-		/*
-		for(kase = 0; kase <= InteSize; kase ++){
-			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
-			double total = (double)1 / (Interval[par][1] - Interval[par][0]);
-			int k;
-			for(k = 1; k <= ttl; k ++){
-				tem = beta[k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
-				total = alpha[par][k] * (total + tem);
-			}
-			Output += (double)total * LenIntervar * delta;
-			
-		}
-		*/
 		double maxx = 0;
 		for(kase = 0; kase <= InteSize; kase ++){
 			double delta = (double)kase / InteSize * (Interval[par][1] - Interval[par][0]) + Interval[par][0];				
@@ -391,15 +444,13 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 				tem = beta[k] * lambda[par] * exp( - pow((delta - x[par][k-1]), 2) / (2 * sigma[par] * sigma[par])  );
 				total = alpha[par][k] * (total + tem);
 			}
-			//printf("%.16f\n", total);
-			//scanf("%d", &sb);
 			if (maxx < total){
 				Output = kase;
 				maxx = total;
 			}
 		}
 		Output = Output * (Interval[par][1] - Interval[par][0]) / InteSize + Interval[par][0];
-		printf("o%0.16f\n", Output);
+		printf("%0.16f\n", Output);
 
 	}
 	return ;
@@ -407,88 +458,3 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 
 /*===================DO NOT CHANGE ANYTHING ABOVE===================*/
-
-
-int main(int argc, char const *argv[]){
-/*	
-	//Function Instruction:
-	Main function, where is the begining of all program
-
-	//Parameter Instruction:
-	void;
-
-	return 0;
-*/
-	//Interval definition
-	freopen("Input.out", "r", stdin);
-	freopen("Output.out", "w", stdout);
-
-	int var;
-	for(int var = 0; var < 256; var ++){
-		scanf("%lf", &Histogram[var]);
-		getchar();
-	}
-
-	int ttl, loop;
-	double gw, gh;
-	char mode;
-	scanf("%d%d%lf%lf%s", &ttl, &loop, &gw, &gh, &mode);
-	getchar();
-	
-	double Interval[ttl][2];
-	for(var = 0; var < ttl; var ++){
-		scanf("%lf%lf", &Interval[var][0], &Interval[var][1]);
-		getchar();
-	}
-	
-	Algorithm(ttl, loop, gw, gh, mode, Interval);
-	
-	return 0;
-}
-
-
-double Cost(int var, double Parameter[var]){
-/*	
-	//Function Instruction:
-	This function will return cost in different situation, which you can change it.
-
-	//Parameter Instruction:
-	double cost valut;
-
-	return 0;
-*/	
-	double Output[256];
-	memset(Output, 0, sizeof(Output));
-	int par, loc;
-	double tem, Total = 0, Prob = 0;
-	
-	//SOME ERROR IN THIS PART OF CODE
-	for(par = 0; par < var / 3; par ++){
-		double Pr, Sigma, Mu;
-		Pr = Parameter[3 * par];
-		Sigma = Parameter[3 * par + 1];
-		Mu = Parameter[3 * par + 2];
-		for(loc = 0; loc < 256; loc ++){
-			//0: Prob, 1: sigma, 2: mu
-			Prob += Pr;
-			tem = exp(- pow(loc - Mu, 2) / (2 * Sigma * Sigma));
-			Output[loc] += (tem * Pr) / (Sigma * sqrt(2 * pi));
-		}
-	}
-	
-	//scanf("%d", &sb);
-	for(loc = 0; loc < 256; loc ++)
-		Total += pow((Output[loc] - Histogram[loc]), 2);
-	Total /= 256;
-	/*
-	if (Prob <= 1)					Total = Total + omega * (1 - Prob);
-	else							Total = Total + omega * (Prob - 1);
-	*/
-	return Total;
-}
-
-
-
-
-
-
