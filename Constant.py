@@ -78,6 +78,17 @@ ThsModel = "ave"
 
 
 
+def Cost(Parameter):
+	import math
+	Var = Parameter[0]
+	print("cnmb2")
+	print("Var = ", Var)
+	sb = abs(pow(math.e, Var) - 2)
+	print("sb = ", sb)
+	return sb
+
+
+
 
 #==============================================================================
 #Parameter check, DO NOT CHANGE THIS FUCNTION
