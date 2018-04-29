@@ -272,13 +272,6 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	/*
 		=========================Calculate the cost J=========================
 	*/
-		//Get the parameter group at present.
-		double Parameter[var];
-		int loop;
-		for(loop = 0; loop < var; loop ++)
-			Parameter[loop] = x[loop][kase];
-
-
 		//import python function - Initial
 		Py_Initialize();
 		
@@ -324,18 +317,20 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 		}
 
 		//Tuple build, and give parameter for learning
+		pArgs = PyTuple_New(1);
 		PyObject* list = PyList_New(0);
-		for (size_t par = 0; par < var; par ++)
-			printf("%.16f\n", x[par][kase]);
+		for (par = 0; par < var; par ++)
 			PyList_Append(list, Py_BuildValue("d", x[par][kase])); //DEBUG!!!
 
+		PyTuple_SetItem(pArgs, 0, list);
+
+		
 		//Using the function
-		PyObject* pyRet = PyObject_CallObject(pFunc, list);
+		PyObject* pyRet = PyObject_CallObject(pFunc, pArgs);
 		
 		//Get the cost result
-		double cnmb;
 		PyArg_Parse(pyRet, "d", &J[kase]);
-		printf("%.16f\n", J[kase]);
+		//printf("%.16f\n", J[kase]);
 		
 		//Clear
 		if(pName)				Py_DECREF(pName);
@@ -483,7 +478,7 @@ int main(int argc, char const *argv[]){
 */
 	//Interval definition
 	freopen("Input.out", "r", stdin);
-	//freopen("Output.out", "w", stdout);
+	freopen("Output.out", "w", stdout);
 
 	int var;
 

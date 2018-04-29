@@ -14,7 +14,7 @@
 #Usually let gw = 0.02, gh = 0.3 and Loop = 2000 in paper
 gw = 0.02
 gh = 0.3
-Loop = 2000
+Loop = 200
 
 
 #==============================================================================
@@ -37,7 +37,7 @@ DEBUG = True
 
 #==============================================================================
 #Problem method
-Tsukaikata = "M"
+Tsukaikata = "F"
 #F = factory image processing(don't need pixel choose)
 #M = medicine image processing(need pixel choose and just get boundary of that block)
 
@@ -51,7 +51,7 @@ GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
 
 #==============================================================================
 #File choosing
-ImageName = "Figure/15.png"
+ImageName = "Figure/18.png"
 #This is the file you want the algorithm working on it.
 
 
@@ -80,12 +80,20 @@ ThsModel = "ave"
 
 def Cost(Parameter):
 	import math
-	Var = Parameter[0]
-	print("cnmb2")
-	print("Var = ", Var)
-	sb = abs(pow(math.e, Var) - 2)
-	print("sb = ", sb)
-	return sb
+	import tem
+	Output = [0.00 for n in range(256)]
+	for i in range(0, int(len(Parameter) / 3 + 0.1)):
+		Pr = Parameter[3 * i]
+		Sigma = Parameter[3 * i + 1]
+		Mu = Parameter[3 * i + 2]
+		for j in range(0, len(Output)):
+			Output[j] += Pr * math.exp(- (pow(j - Mu, 2) / (2 * Sigma * Sigma)))
+	TTL = 0
+	for i in range(0, len(Output)):
+		TTL += pow(Output[i] - tem.Histogram[i], 2)
+	print(TTL)
+
+	return TTL / 256
 
 
 

@@ -179,10 +179,13 @@ def Main2(ImageName):
 
 	#==============================================================================
 	#Parameter Saving and output - writing string
+	String = "Histogram = "
+	String += str(Histogram)
+	FileName = "tem.py"
+	File = open(FileName, "w")
+	File.write(String)
+	File.close()
 	String = ""
-	for i in range(0, 256):
-		String += str(Histogram[i])
-		String += "\n"
 	String += str(len(PairOfZC) * 3) + " " + str(Constant.Loop) + " " + str(Constant.gw) + " " + str(Constant.gh) + " " + Constant.mode + "\n"
 	for i in range(0, len(PairOfZC)):
 		String += str(0.0) + " " + str(1.0) + "\n"
@@ -204,7 +207,7 @@ def Main2(ImageName):
 	#Compile C files
 	if Init.SystemJudge() == 0:		
 		os.system("rm CARLA")
-		os.system("gcc CARLA.c -lm -o CARLA")
+		os.system("gcc -I/usr/include/python2.7/ CARLA.c -o CARLA -L/usr/lib/ -lpython2.7")
 	else:
 		os.system("rm CARLA.exe")
 		os.system("gcc CARLA.c")
