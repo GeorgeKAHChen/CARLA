@@ -55,28 +55,6 @@ ImageName = "Figure/18.png"
 #This is the file you want the algorithm working on it.
 
 
-#==============================================================================
-#The number of clusters
-SegVar = 2
-#1 means auto(With Gap Statistic)
-#0 means auto(With Zero crossing)
-#in N*
-
-
-#==============================================================================
-#Learning model
-LearnModel = "part"
-#"all" means learning all 3K parameter
-#"part" means learning only 2K parameter
-
-
-#==============================================================================
-#ths model
-ThsModel = "ave"
-#"ave" means using the average location of mu
-#"var" means Judge with the value of all function
-
-
 
 def Cost(Parameter):
 	import math

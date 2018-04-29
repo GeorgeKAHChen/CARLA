@@ -43,11 +43,17 @@ import os.path
 import math
 import matplotlib.patches as patches
 from scipy import misc
+from scipy import signal
 from collections import deque
 from PIL import ImageFilter
 import cv2
 from copy import deepcopy
 import random
+import pandas as pd
+from gap_statistic import OptimalK
+from sklearn.datasets.samples_generator import make_blobs
+from sklearn.cluster import KMeans
+
 
 
 #import Files
@@ -217,7 +223,7 @@ def ProbLearn(HisArr, ZeroC):
 	return ZeroC
 
 
-def Treasholding(img, TSH, TSH2):
+def Thresholding(img, TSH, TSH2):
 	TemImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
 	for i in range(0, len(img)):
 		for j in range(0, len(img[i])):
@@ -348,6 +354,38 @@ def CombineFigures(img1, img2, model):
 	return np.array(img)
 
 
+def GetPeak(Histogram, N_Cluster):
+	PeaksFinal = []
+	size = [2, 256, 128]
+	peaks = [len(signal.find_peaks_cwt(Histogram, np.arange(1,2))), len(signal.find_peaks_cwt(Histogram, np.arange(1,256))), 0]
 
+	while 1:
+		if peaks[0] > N_Cluster and peaks[1] < N_Cluster:
+			PeaksFinal = signal.find_peaks_cwt(Histogram, np.arange(1, size[2]))
+			peaks[2] = len(PeaksFinal)
+		
+		if size[1] - size[0] <= 1 or peaks[2] == N_Cluster or peaks[0] < N_Cluster or peaks[1] > N_Cluster:
+			break
 
+		if peaks[0] > N_Cluster and peaks[2] < N_Cluster:
+			size[1] = size[2]
+			size[2] = int((size[0] + size[1]) / 2)
+			peaks[1] = peaks[2]
+			continue
+		
+		if peaks[1] < N_Cluster and peaks[2] > N_Cluster:
+			size[0] = size[2]
+			size[2] = int((size[0] + size[1]) / 2)
+			peaks[0] = peaks[2]
+			continue
+
+	if PeaksFinal[0] == 0:
+		PeaksFinal[0] = 1
+	if PeaksFinal[len(PeaksFinal)-1] == 255:
+		PeaksFinal[len(PeaksFinal)-1] = 254
+
+	PairOfZC = []
+	for i in range(0, len(PeaksFinal)):
+		PairOfZC.append([PeaksFinal[i] - 1, PeaksFinal[i]])
+	return PairOfZC	
 	
