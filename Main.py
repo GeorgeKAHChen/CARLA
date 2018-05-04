@@ -94,7 +94,7 @@ def Main2(ImageName):
 		AnaLine += "His = "
 		AnaLine += str(Histogram)
 		AnaLine += "\n"
-
+		print("Cluster Begin")
 
 	
 	"""
@@ -106,24 +106,18 @@ def Main2(ImageName):
 
 	#==============================================================================
 	#Gap statistic and judgement
-	if Constant.SegVar == 1:
-		optimalK = OptimalK(parallel_backend = 'joblib')
-		ClusterSet = []
-		for i in range(0, len(img)):
-			for j in range(0, len(img[i])):
-				ClusterSet.append([float(img[i][j])])
-		ClusterSet = np.array(ClusterSet)
-		N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 50))
-		if N_Cluster < 3:
-			N_Cluster = 3
-		elif N_Cluster > 6:
-			N_Cluster = 6
-	else:
-		N_Cluster = Constant.SegVar
-		
-	
-		if DEBUG:
-			print("Cluster = " + str(N_Cluster))
+	optimalK = OptimalK(parallel_backend = 'joblib')
+	ClusterSet = []
+	for i in range(0, len(img)):
+		for j in range(0, len(img[i])):
+			ClusterSet.append([float(img[i][j])])
+	ClusterSet = np.array(ClusterSet)
+	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 20))
+	if N_Cluster == 1:
+		N_Cluster = 3
+
+	if DEBUG:
+		print("Cluster = " + str(N_Cluster))
 
 	
 	#==============================================================================
@@ -142,6 +136,8 @@ def Main2(ImageName):
 		#==============================================================================
 		#Pretreatment of CARLA, get the initial data
 		PairOfZC = Pretreatment.GetPeak(Histogram, Gap)
+		if DEBUG:
+			print(len(PairOfZC), Gap)
 		PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
 
 
@@ -192,9 +188,9 @@ def Main2(ImageName):
 					TemStr += FileLine[i]
 				Data.append(float(TemStr))
 		
-		FinalCost[Gap] = Constant.Cost(Data)
+		FinalCost[Gap - 1] = Constant.Cost(Data)
 		if Gap != N_Cluster:
-			if FinalCost[Gap] > FinalCost[Gap + 1]:
+			if FinalCost[Gap - 1] > FinalCost[Gap]:
 				break
 		TrueGap = Gap
 		DataLast = Data
@@ -213,6 +209,9 @@ def Main2(ImageName):
 	#Thresholding solution	
 	#==============================================================================
 	"""
+	if DEBUG:
+		print(TrueGap)
+
 	Thresholding = [0]
 	if TrueGap == 1:
 		Sum = 0.00
@@ -223,12 +222,27 @@ def Main2(ImageName):
 				Tem = i
 				break
 		if Tem != 0:
-			Thresholding.append(Tem - 0.5)
+			Thresholding.append(Tem)
 		else:
 			Thresholding.append(1)
 
 	else:
-		
+		Value = [[0.00 for n in range(256)] for n in range(TrueGap)]
+		for p in range(0, TrueGap):
+			Prob = DataLast[p * 3]
+			Sigma = DataLast[p * 3 + 1]
+			Mu = DataLast[p * 3 + 2]
+			for q in range(0, 256):
+				Value[p][q] = Prob * math.exp(- (pow(q - Mu, 2) / (2 * Sigma * Sigma))) / (math.sqrt(2 * math.pi) * Sigma)
+		Init.ArrOutput(Value, 1)
+		Group = 0
+		for p in range(0, 256):
+			if Value[Group + 1][p] > Value[Group][p]:
+				Group += 1
+				if Thresholding[len(Thresholding) - 1] - p >= 3:
+					Thresholding.append(p)
+				if Group == TrueGap - 1:
+					break
 
 	Thresholding.append(255)
 	if DEBUG:
@@ -256,9 +270,12 @@ def Main2(ImageName):
 			OutImg[p][q] = 255 - OutImg[p][q]
 
 
+
+	"""
 	#==============================================================================
 	#Output and Print
 	#==============================================================================
+	"""
 	if Constant.mode == "p":
 		plt.imshow(OutImg, cmap="gray")
 		plt.axis("off")
@@ -266,9 +283,12 @@ def Main2(ImageName):
 		input("Press Enter to continue")
 
 
+
+	"""
 	#==============================================================================
 	#Factory output
 	#==============================================================================
+	"""
 	if Constant.Tsukaikata == "F":
 		OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
 		misc.imsave("Saving/result.png", OutImg)
@@ -279,9 +299,11 @@ def Main2(ImageName):
 
 
 
-
+	"""
 	#==============================================================================
 	#Medicine output
+	#==============================================================================
+	"""
 	#==============================================================================
 	#Output and Print
 	if Constant.Tsukaikata == "M":

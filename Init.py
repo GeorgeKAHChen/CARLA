@@ -286,7 +286,7 @@ def ArrOutput(Arr, Mode):
 			Str += str(Arr[i][j])
 			if Mode == 0:
 				Str += "\t"
-			elif Mode == 1:
+			elif Mode == 1 and j != len(Arr[i]):
 				Str += ", "
 		if Mode == 0:
 			Str += "\n"

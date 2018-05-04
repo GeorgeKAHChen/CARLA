@@ -14,7 +14,7 @@
 #Usually let gw = 0.02, gh = 0.3 and Loop = 2000 in paper
 gw = 0.02
 gh = 0.3
-Loop = 200
+Loop = 1000
 
 
 #==============================================================================
@@ -51,7 +51,7 @@ GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
 
 #==============================================================================
 #File choosing
-ImageName = "Figure/18.png"
+ImageName = "Figure/09.png"
 #This is the file you want the algorithm working on it.
 
 
@@ -65,11 +65,10 @@ def Cost(Parameter):
 		Sigma = Parameter[3 * i + 1]
 		Mu = Parameter[3 * i + 2]
 		for j in range(0, len(Output)):
-			Output[j] += Pr * math.exp(- (pow(j - Mu, 2) / (2 * Sigma * Sigma)))
+			Output[j] += Pr * math.exp(- (pow(j - Mu, 2) / (2 * Sigma * Sigma))) / (math.sqrt(2 * math.pi) * Sigma)
 	TTL = 0
 	for i in range(0, len(Output)):
 		TTL += pow(Output[i] - tem.Histogram[i], 2)
-	print(TTL)
 
 	return TTL / 256
 
@@ -96,25 +95,6 @@ def ParameterDetermine():
 
 	if not os.path.exists(ImageName):
 		print("File not exist")
-		NoError = False
-
-	try:
-		tem = str(SegVar)
-		int(tem)
-	except:
-		print("Cluster value error")
-		NoError = False
-
-	if SegVar < 0:
-		print("Cluster value error")
-		NoError = False
-
-	if LearnModel == "all" and SegVar == 0:
-		print("Cluster value error, Learning all parameter cannot have 0 cluster")
-		NoError = False
-	
-	if LearnModel != "all" and LearnModel != "part":
-		print("CARLA learning error")
 		NoError = False
 
 	return NoError
