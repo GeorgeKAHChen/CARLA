@@ -36,33 +36,9 @@ DEBUG = True
 
 
 #==============================================================================
-#Problem method
-Tsukaikata = "F"
-#F = factory image processing(don't need pixel choose)
-#M = medicine image processing(need pixel choose and just get boundary of that block)
-
-
-#==============================================================================
-#Histogram smoothing kernel
-GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
-#This is a group sample Gaussian kernel with sigma = 1.00
-#To smoothing the histogram figure
-
-
-#==============================================================================
 #File choosing
 ImageName = "Figure/aznyan.jpg"
 #This is the file you want the algorithm working on it.
-
-
-#==============================================================================
-#Global variable:   Alpha: A parameter about the relationship between weight and Grey
-Alpha = 0.5
-
-
-#==============================================================================
-#Global variable:   Beta:  A parameter about the relationship between weight and Distance
-Beta = 0.5
 
 
 #==============================================================================
@@ -73,6 +49,8 @@ System = "L"
 #==============================================================================
 #Distance between two thresholding
 ThsDis = 5
+
+
 
 #==============================================================================
 #Cost function, using in CARLA learning main algorithm

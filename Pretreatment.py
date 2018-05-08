@@ -93,14 +93,6 @@ Recovery(BlockSize, BlockInfo, ImageName):
 	This function will recovery all images from protial
 
 
-HistSmooth(HisArr):
-	This function will smooth histogram
-
-	HisArr = [the histogram you want to smooth]
-
-	return smooth histogram
-
-
 CombineFigures(img1, img2, model):
 	#This function will combine two figures in different RGB channel
 	
@@ -466,11 +458,6 @@ def Recovery(BlockSize, BlockInfo, ImageName):
 			for j in range(0, len(img1[i])): 
 				img[FigSize * BlockInfo[kase][0] + i][FigSize * BlockInfo[kase][1] + j] = img1[i][j]
 	Output(img, ImageName, 2)
-
-
-
-def HistSmooth(HisArr):
-	return np.convolve(HisArr, Constant.GauKernel, mode='full')
 
 
 

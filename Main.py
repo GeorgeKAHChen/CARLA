@@ -118,6 +118,7 @@ def Main2(ImageName):
 	#Segmentation with distance matrix
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
 
+
 	for i in range(0, len(Thresholding) - 1):
 		Interval = [Thresholding[i], Thresholding[i + 1]]
 		BlockSet = []
@@ -148,7 +149,8 @@ def Main2(ImageName):
 			File.close()
 
 
-	#NOT FINISHED
+
+
 	if DEBUG:
 		AnaLine += "ths = "
 		AnaLine += str(Thresholding)
@@ -157,7 +159,6 @@ def Main2(ImageName):
 		File = open(FileName, "w")
 		File.write(AnaLine)
 		File.close()
-
 
 
 
@@ -176,104 +177,18 @@ def Main2(ImageName):
 
 	"""
 	#==============================================================================
-	#Factory output
+	# output
 	#==============================================================================
 	"""
-	if Constant.Tsukaikata == "F":
-		OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
-		misc.imsave("Saving/result.png", OutImg)
-		return OutImg
+
+	OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
+	misc.imsave("Saving/result.png", OutImg)
+	return OutImg
 	#==============================================================================
 	#==============================================================================
 
 
 
 
-	"""
-	#==============================================================================
-	#Medicine output
-	#==============================================================================
-	"""
-	#==============================================================================
-	#Output and Print
-	if Constant.Tsukaikata == "M":
-		#==============================================================================
-		#Location choose
-		plt.imshow(img, cmap="gray")
-		plt.axis("off")
-		plt.show()
-
-		PointY = Init.IntInput("Input location X = ", "0", "999999999", "int")
-		PointX = Init.IntInput("Input location Y = ", "0", "999999999", "int")
-		AnoImg = [[0 for n in range(len(img[0]))] for n in range(len(img))]
-	
-
-		#==============================================================================
-		#Get boundary (with BFS)
-		Stack = [[PointX, PointY]]
-		AnoImg[PointX][PointY] = 1
-		while 1:
-			tem1 = Stack.pop()
-			LocX = tem1[0]
-			LocY = tem1[1]
-			if OutImg[LocX + 1][LocY] >= 5 and AnoImg[LocX + 1][LocY] == 0:
-				Stack.append([LocX + 1, LocY])
-				AnoImg[LocX + 1][LocY] = 1
-			
-			elif AnoImg[LocX + 1][LocY] != 1:
-				AnoImg[LocX + 1][LocY] = 255
-
-
-			if OutImg[LocX - 1][LocY] >= 5 and AnoImg[LocX - 1][LocY] == 0:
-				Stack.append([LocX - 1, LocY])
-				AnoImg[LocX - 1][LocY] = 1
-		
-			elif AnoImg[LocX - 1][LocY] != 1:
-				AnoImg[LocX - 1][LocY] = 255
-
-
-			if OutImg[LocX][LocY + 1] >= 5 and AnoImg[LocX][LocY + 1] == 0:
-				Stack.append([LocX, LocY + 1])
-				AnoImg[LocX][LocY + 1] = 1
-
-			elif AnoImg[LocX][LocY + 1] != 1:
-				AnoImg[LocX][LocY + 1] = 255
-
-
-			if OutImg[LocX][LocY - 1] >= 5 and AnoImg[LocX][LocY - 1] == 0:
-				Stack.append([LocX, LocY - 1])
-				AnoImg[LocX][LocY - 1] = 1
-
-			elif AnoImg[LocX][LocY - 1] != 1:
-				AnoImg[LocX][LocY - 1] = 255
-
-			if len(Stack) == 0:
-				break
-		
-
-		#==============================================================================
-		#Boundary Print
-		OutImg = [[0 for n in range(len(img[1]))] for n in range(len(img))]
-		for p in range(0, len(OutImg)):
-			for q in range(0, len(OutImg[p])):
-				if AnoImg[p][q] == 255:
-					OutImg[p][q] = 0
-				else:
-					OutImg[p][q] = 255
-
-
-		#==============================================================================
-		#Output the figure
-		OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
-		misc.imsave("Saving/result.png", OutImg)
-		return OutImg
-
-
-	#==============================================================================
-	#==============================================================================
-
-
-
-ImageName = Constant.ImageName
-Main2(ImageName)
+Main2(Constant.ImageName)
 
