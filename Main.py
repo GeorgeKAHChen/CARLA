@@ -56,7 +56,7 @@ def Main2(ImageName):
 	#==============================================================================
 	#Image input
 	img = np.array(Image.open(ImageName).convert("L"))
-	
+
 
 	#==============================================================================
 	#Smoothing(with FFT based convolution)
@@ -100,9 +100,9 @@ def Main2(ImageName):
 	#Compile C files
 	if Init.SystemJudge() == 0:		
 		os.system("rm CARLA")
-		if System == "L":
+		if Constant.System == "L":
 			os.system("gcc -Wall -lm -I/usr/include/python3.6m CARLA.c -o CARLA -L/usr/lib -lpython3.6m")
-		if System == "M":
+		if Constant.System == "M":
 			os.system("gcc -Wall -lm -I/usr/include/python2.7 CARLA.c -o CARLA -L/usr/lib -lpython2.7")
 	else:
 		os.system("rm CARLA.exe")

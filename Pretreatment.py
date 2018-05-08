@@ -467,8 +467,6 @@ def GetPeak(Histogram, N_Cluster):
 			peaks[0] = peaks[2]
 			continue
 
-	if PeaksFinal[0] == 0:
-		PeaksFinal[0] = 1
 	if PeaksFinal[len(PeaksFinal)-1] == 255:
 		PeaksFinal[len(PeaksFinal)-1] = 254
 
