@@ -69,14 +69,14 @@ def Main2(ImageName):
 
 	#==============================================================================
 	#Toboggan Algorithm
-	TobImage, TobBlock = RWPart.Toboggan()
+	TobImage, TobBlock = RWPart.Toboggan(img)
 	#CAUTION: The block code of Toboggan is begin from 1 rather than 0!!
 	
 
 	#==============================================================================
 	#Get the histogram
-	Histogram = [0 for n in range(len(256))]
-	TTK = 0
+	Histogram = [0 for n in range(256)]
+	TTL = 0
 	for i in range(0, len(TobBlock)):
 		Histogram[TobBlock[i][1]] += TobBlock[i][4]
 		TTL += TobBlock[i][4]
@@ -84,7 +84,7 @@ def Main2(ImageName):
 	for i in range(0, len(Histogram)):
 		Histogram[i] /= TTL
 
-	
+
 
 	#==============================================================================
 	#Histogram Saving and output
@@ -100,7 +100,10 @@ def Main2(ImageName):
 	#Compile C files
 	if Init.SystemJudge() == 0:		
 		os.system("rm CARLA")
-		os.system("gcc -I/usr/include/python2.7/ CARLA.c -o CARLA -L/usr/lib/ -lpython2.7")
+		if System == "L":
+			os.system("gcc -Wall -lm -I/usr/include/python3.6m CARLA.c -o CARLA -L/usr/lib -lpython3.6m")
+		if System == "M":
+			os.system("gcc -Wall -lm -I/usr/include/python2.7 CARLA.c -o CARLA -L/usr/lib -lpython2.7")
 	else:
 		os.system("rm CARLA.exe")
 		os.system("gcc CARLA.c")
@@ -108,22 +111,10 @@ def Main2(ImageName):
 	if DEBUG:
 		AnaLine += "His = "
 		AnaLine += str(Histogram)
-		AnaLine += "\n"
+		AnaLine += ";\n"
 		print("Cluster Begin")
 
 
-
-	"""
-	#==============================================================================
-	#Calculation of Toboggan Random Walk part
-	#==============================================================================
-	"""
-	#==============================================================================
-	#Get the distant weight matrix
-	
-
-
-	
 	"""
 	#==============================================================================
 	#Gap Statistic
@@ -198,7 +189,7 @@ def Main2(ImageName):
 		if Init.SystemJudge() == 0:
 			os.system("./CARLA")
 		else:
-			os.system(".\CARLA.exe")
+			os.system("CARLA.exe")
 		
 
 		#==============================================================================
@@ -229,7 +220,7 @@ def Main2(ImageName):
 	if DEBUG:
 		AnaLine += "tem = "
 		AnaLine += str(Data)
-		AnaLine += "\n"
+		AnaLine += ";\n"
 
 
 
@@ -273,24 +264,44 @@ def Main2(ImageName):
 				if Group == TrueGap - 1:
 					break
 
-	Thresholding.append(255)
-	if DEBUG:
-		print(Thresholding)
-		AnaLine += "ths = "
-		AnaLine += str(Thresholding)
-		AnaLine += "\n"
-		FileName = "SaveArrTem"
-		File = open(FileName, "w")
-		File.write(AnaLine)
-		File.close()
+	Thresholding.append(256)
+
 
 
 	#==============================================================================
 	#Segmentation with distance matrix
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
 
+	for i in range(0, len(Thresholding) - 1):
+		Interval = [Thresholding[i], Thresholding[i + 1]]
+		BlockSet = []
+		for j in range(1, len(TobBlock)):
+			if TobBlock[j][1] < Interval[1] and TobBlock[j][1] >= Interval[0]:
+				BlockSet.append(j)
+		SubBlock = [[0.00 for n in range(len(BlockSet))] for n in range(len(BlockSet))]
+		SizeSet = []
+		for p in range(0, len(SubBlock)):
+			for q in range(p + 1, len(SubBlock)):
+				tem1 = BlockSet[p]
+				tem2 = BlockSet[q]
+				SubBlock[p][q] = sqrt( pow(TobBlock[tem1][2] - TobBlock[tem2][2], 2) + pow(TobBlock[tem1][3] - TobBlock[tem2][3], 2) )
+				SubBlock[q][p] = SubBlock[p][q]
+				SizeSet.append(SubBlock[p][q])
+		AveDis = sum(SizeSet) / len(SizeSet)
+		AnaLine += "sb" + str(i) + " = "
+		AnaLine += str(SizeSet)
+		AnaLine += ";\n"
 
 
+	#NOT FINISHED
+	if DEBUG:
+		AnaLine += "ths = "
+		AnaLine += str(Thresholding)
+		AnaLine += ";\n"
+		FileName = "SaveArrTem"
+		File = open(FileName, "w")
+		File.write(AnaLine)
+		File.close()
 
 
 

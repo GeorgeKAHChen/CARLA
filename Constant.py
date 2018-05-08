@@ -51,7 +51,7 @@ GauKernel = [0.06136, 0.24477, 0.38774, 0.24477, 0.06136]
 
 #==============================================================================
 #File choosing
-ImageName = "Figure/09.png"
+ImageName = "Figure/aznyan.jpg"
 #This is the file you want the algorithm working on it.
 
 

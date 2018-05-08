@@ -143,14 +143,6 @@ def Toboggan(img):
 
 
 
-def WeightFunc(Point1, Point2):
-	Grey = math.sqrt(pow( (Point1[1] - Point2[1]) , 2))
-	X = pow( (Point1[2]-Point2[2]) , 2)
-	Y = pow( (Point1[3]-Point2[3]) , 2)
-	Distance = math.sqrt(X + Y)
-	return math.exp( - Constant.Alpha * Grey - Constant.Beta * Distance )
-
-
 
 
 
