@@ -99,6 +99,11 @@ def Main2(ImageName):
 	#GMM - CARLA
 	DataLast = Pretreatment.CARLA(Histogram, PairOfZC)
 
+	#==============================================================================
+	#GMM - Ths
+	Thresholding = Pretreatment.GMM_THS(Histogram, DataLast)
+	
+
 	if DEBUG:
 		AnaLine += "tem = "
 		AnaLine += str(DataLast)
@@ -111,14 +116,9 @@ def Main2(ImageName):
 	#Thresholding solution with distance matirx
 	#==============================================================================
 	"""
-	TrueGap = int(len(DataLast) / 3 + 0.1)
-	Thresholding = Pretreatment.GMM_THS(Histogram, DataLast)
-
 	#==============================================================================
 	#Segmentation with distance matrix
-	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
-
-
+	BlockArea = 0
 	for i in range(0, len(Thresholding) - 1):
 		Interval = [Thresholding[i], Thresholding[i + 1]]
 		BlockSet = []
@@ -126,6 +126,8 @@ def Main2(ImageName):
 			if TobBlock[j][1] < Interval[1] and TobBlock[j][1] >= Interval[0]:
 				BlockSet.append(j)
 		SubBlock = [[0.00 for n in range(len(BlockSet))] for n in range(len(BlockSet))]
+		
+
 		SizeSet = []
 		for p in range(0, len(SubBlock)):
 			for q in range(p + 1, len(SubBlock)):
@@ -136,6 +138,36 @@ def Main2(ImageName):
 				SizeSet.append(SubBlock[p][q])
 		AveDis = sum(SizeSet) / len(SizeSet)
 		
+
+		Num = [0 for n in range(int(max(SizeSet) + 1))]
+		for i in range(0, len(SizeSet)):
+			Num[int(SizeSet[i])] += 1
+
+
+		PairOfZC = Pretreatment.ProbLearn(Num, Pretreatment.GetPeak(Num, 10))
+		DataLast = Pretreatment.CARLA(Num, PairOfZC)
+		DisTHS = Pretreatment.GMM_THS(Num, DataLast)
+		ValThs = DisTHS[1]
+
+		BlockProb = [0.00 for n in range(len(SizeSet))]
+		TTL = 0
+		for p in range(0, len(BlockProb)):
+			for q in range(0, len(BlockProb)):
+				if p == q:
+					continue
+				TTL += 1
+				if SubBlock[p][q] < ValThs:
+					BlockProb[p] += 1
+
+		for p in range(0, len(BlockProb)):
+			BlockProb[p] /= TTL
+			if BlockProb[p] >= Constant.DisPar:
+				TobBlock[SizeSet[p]] = BlockArea
+
+		BlockArea += 1
+
+
+
 		if DEBUG:
 			if i == 0:
 				os.system("rm -r CARLA-test/Data")
@@ -150,6 +182,28 @@ def Main2(ImageName):
 
 
 
+
+	for i in range(1, len(TobBlock)):
+		if TobBlock[i][0] != -1:
+			continue
+
+		Dis = [99999999 for n in range(len(TobBlock))]
+		for j in range(1, len(TobBlock)):
+			if TobBlock[j][0] == -1:
+				continue
+			Dis[j] = math.sqrt( pow(TobBlock[i][2] - TobBlock[j][2], 2) + pow(TobBlock[i][3] - TobBlock[j][3], 2) )
+
+		Size = 99999999
+		for j in range(1, len(TobBlock)):
+			if Dis[j] < Size:
+				Size = Dis[j]
+				TobBlock[i][0] = TobBlock[j][0]
+
+
+	
+
+
+	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
 
 	if DEBUG:
 		AnaLine += "ths = "

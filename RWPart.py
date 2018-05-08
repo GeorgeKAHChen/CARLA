@@ -125,11 +125,10 @@ def Toboggan(img):
 	BlockInfo = [[0, 0, 0, 0, 0]]
 
 	for i in range(1, len(Color)):
-		Tem = [i]
+		Tem = [-1]
 		Tem.append(abs(int(Color[i][1]/Color[i][0])))
 		Tem.append(abs(int(Loc[i][0]/Color[i][0])))
 		Tem.append(abs(int(Loc[i][1]/Color[i][0])))
-		
 		Tem.append(0)
 		BlockInfo.append(Tem)
 
