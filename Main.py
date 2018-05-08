@@ -39,7 +39,7 @@ DEBUG = Constant.DEBUG
 def Main2(ImageName):
 	"""
 	#==============================================================================
-	#Pretreatments
+	#Pretreatments and Definition
 	#==============================================================================
 	"""
 	#==============================================================================	
@@ -47,104 +47,42 @@ def Main2(ImageName):
 	if Constant.ParameterDetermine() == False:
 		return
 
-
 	#==============================================================================
 	#For output to matlab image statistic
 	AnaLine = ""
 	
-
 	#==============================================================================
 	#Image input
 	img = np.array(Image.open(ImageName).convert("L"))
 
+	#==============================================================================
+	#Initial CARLA
+	Pretreatment.Pre_CARLA()
 
 	#==============================================================================
-	#Smoothing(with FFT based convolution)
-	InpK = np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])/25
-	img1 = signal.fftconvolve(img, InpK[::-1], mode='full')
-	for i in range(0, len(img)):
-		for j in range(0, len(img[i])):
-			img[i][j] = int(img1[i][j])
+	#Give Minimum number of GMM model
+	N_Cluster = 20
 
 
+
+	"""
+	#==============================================================================
+	#Pre-Processing Algorithm and Claculation
+	#==============================================================================
+	"""
 	#==============================================================================
 	#Toboggan Algorithm
 	TobImage, TobBlock = RWPart.Toboggan(img)
 	#CAUTION: The block code of Toboggan is begin from 1 rather than 0!!
 	
-
 	#==============================================================================
 	#Get the histogram
-	Histogram = [0 for n in range(256)]
-	TTL = 0
-	for i in range(0, len(TobBlock)):
-		Histogram[TobBlock[i][1]] += TobBlock[i][4]
-		TTL += TobBlock[i][4]
+	Histogram = Pretreatment.Histogram(TobBlock)
 	
-	for i in range(0, len(Histogram)):
-		Histogram[i] /= TTL
-
-
-
-	#==============================================================================
-	#Histogram Saving and output
-	String = "Histogram = "
-	String += str(Histogram)
-	FileName = "tem.py"
-	File = open(FileName, "w")
-	File.write(String)
-	File.close()
-
-
-	#==============================================================================
-	#Compile C files
-	if Init.SystemJudge() == 0:		
-		os.system("rm CARLA")
-		if Constant.System == "L":
-			os.system("gcc -Wall -lm -I/usr/include/python3.6m CARLA.c -o CARLA -L/usr/lib -lpython3.6m")
-		if Constant.System == "M":
-			os.system("gcc -Wall -lm -I/usr/include/python2.7 CARLA.c -o CARLA -L/usr/lib -lpython2.7")
-	else:
-		os.system("rm CARLA.exe")
-		os.system("gcc CARLA.c")
-
 	if DEBUG:
 		AnaLine += "His = "
 		AnaLine += str(Histogram)
 		AnaLine += ";\n"
-		print("Cluster Begin")
-
-
-	"""
-	#==============================================================================
-	#Gap Statistic
-	#==============================================================================
-	"""
-	N_Cluster = 0
-
-	#==============================================================================
-	#Gap statistic and judgement
-	"""
-	optimalK = OptimalK(parallel_backend = 'joblib')
-	ClusterSet = []
-	for i in range(0, len(img)):
-		for j in range(0, len(img[i])):
-			ClusterSet.append([float(img[i][j])])
-	ClusterSet = np.array(ClusterSet)
-	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 20))
-	if N_Cluster < 3:
-		N_Cluster = 3
-	"""
-	N_Cluster = 20
-	if DEBUG:
-		print("Cluster = " + str(N_Cluster))
-
-	
-	#==============================================================================
-	#Final cost 
-	FinalCost = [0.00 for n in range(N_Cluster)]
-	TrueGap = N_Cluster
-	DataLast = []
 
 
 
@@ -153,77 +91,17 @@ def Main2(ImageName):
 	#Main CARLA Algorithm Loop
 	#==============================================================================
 	"""
-
-	for Gap in range(N_Cluster, 0, -1):
-		#==============================================================================
-		#Pretreatment of CARLA, get the initial data
-		PairOfZC = Pretreatment.GetPeak(Histogram, Gap)
-		if len(PairOfZC) == 0:
-			break
-		if DEBUG:
-			print(len(PairOfZC), Gap)
-		PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
-		
-
-		#==============================================================================
-		#Data Saving
-		String = ""
-		String += str(len(PairOfZC) * 3) + " " + str(Constant.Loop) + " " + str(Constant.gw) + " " + str(Constant.gh) + " " + Constant.mode + "\n"
-		for i in range(0, len(PairOfZC)):
-			String += str(0.0) + " " + str(1.0) + "\n"
-			String += str(0) + " " + str(255) + "\n"
-			String += str(PairOfZC[i][0]) + " " + str(PairOfZC[i][1]) + "\n"
-		FileName = "Input.out"
-		os.system("rm " + FileName)
-		Init.BuildFile(FileName)
-		File = open(FileName, "a")
-		File.write(String)
-		File.close()
-
-		
-
-		"""		
-		#==============================================================================
-		#CARLA MAIN ALGORIHTM
-		#==============================================================================
-		#Learning Automaton : Continuous Action Reinforcement Learning Automaton 
-		"""
-		#==============================================================================
-		#Main Algorithm in C
-		if Init.SystemJudge() == 0:
-			os.system("./CARLA")
-		else:
-			os.system("CARLA.exe")
-		
-
-		#==============================================================================
-		#Read the output file
-		FileName = "Output.out"
-		File = open(FileName, "r")
-		Data = []
-		while 1:
-			FileLine = File.readline()
-			if not FileLine:
-				break
-			
-			if FileLine[0] == "o":
-				TemStr = ""
-				for i in range(1, len(FileLine)):
-					TemStr += FileLine[i]
-				Data.append(float(TemStr))
-		
-		FinalCost[Gap - 1] = Constant.Cost(Data)
-		if Gap != N_Cluster:
-			if FinalCost[Gap - 1] > FinalCost[Gap]:
-				break
-		TrueGap = Gap
-		DataLast = Data
-
-
+	#==============================================================================
+	#Pretreatment of CARLA, get the initial data
+	PairOfZC = Pretreatment.ProbLearn(Histogram, Pretreatment.GetPeak(Histogram, N_Cluster))
+	
+	#==============================================================================
+	#GMM - CARLA
+	DataLast = Pretreatment.CARLA(Histogram, PairOfZC)
 
 	if DEBUG:
 		AnaLine += "tem = "
-		AnaLine += str(Data)
+		AnaLine += str(DataLast)
 		AnaLine += ";\n"
 
 
@@ -233,44 +111,8 @@ def Main2(ImageName):
 	#Thresholding solution with distance matirx
 	#==============================================================================
 	"""
-	if DEBUG:
-		print(TrueGap)
-
-	Thresholding = [0]
-	if TrueGap == 1:
-		Sum = 0.00
-		Tem = 0
-		for i in range(0, len(Histogram)):
-			Sum += Histogram[i]
-			if Sum >= 0.5:
-				Tem = i
-				break
-		if Tem != 0:
-			Thresholding.append(Tem)
-		else:
-			Thresholding.append(1)
-
-	else:
-		Value = [[0.00 for n in range(256)] for n in range(TrueGap)]
-		for p in range(0, TrueGap):
-			Prob = DataLast[p * 3]
-			Sigma = DataLast[p * 3 + 1]
-			Mu = DataLast[p * 3 + 2]
-			for q in range(0, 256):
-				Value[p][q] = Prob * math.exp(- (pow(q - Mu, 2) / (2 * Sigma * Sigma))) / (math.sqrt(2 * math.pi) * Sigma)
-		Init.ArrOutput(Value, 1)
-		Group = 0
-		for p in range(0, 256):
-			if Value[Group + 1][p] > Value[Group][p]:
-				Group += 1
-				if Thresholding[len(Thresholding) - 1] - p >= 3:
-					Thresholding.append(p)
-				if Group == TrueGap - 1:
-					break
-
-	Thresholding.append(256)
-
-
+	TrueGap = int(len(DataLast) / 3 + 0.1)
+	Thresholding = Pretreatment.GMM_THS(Histogram, DataLast)
 
 	#==============================================================================
 	#Segmentation with distance matrix
@@ -292,9 +134,18 @@ def Main2(ImageName):
 				SubBlock[q][p] = SubBlock[p][q]
 				SizeSet.append(SubBlock[p][q])
 		AveDis = sum(SizeSet) / len(SizeSet)
-		AnaLine += "sb" + str(i) + " = "
-		AnaLine += str(SizeSet)
-		AnaLine += ";\n"
+		
+		if DEBUG:
+			if i == 0:
+				os.system("rm -r CARLA-test/Data")
+				os.system("mkdir CARLA-test/Data")
+			OutArr = "sjb = "
+			OutArr += str(SizeSet)
+			OutArr += "\n"
+			FileName = "CARLA-test/Data/ArrFile" + str(i) + ".py"
+			File = open(FileName, "w")
+			File.write(OutArr)
+			File.close()
 
 
 	#NOT FINISHED

@@ -78,7 +78,7 @@ AutoTH(Histogram, varTH):
 	**DO NOT USE THIE FUNCTION ANY MORE
 
 
-def Partial(img):
+Partial(img):
 	This function will block a large image as small block
 
 	img = [array of large image ]
@@ -89,11 +89,11 @@ def Partial(img):
 
 
 
-def Recovery(BlockSize, BlockInfo, ImageName):
+Recovery(BlockSize, BlockInfo, ImageName):
 	This function will recovery all images from protial
 
 
-def HistSmooth(HisArr):
+HistSmooth(HisArr):
 	This function will smooth histogram
 
 	HisArr = [the histogram you want to smooth]
@@ -101,7 +101,7 @@ def HistSmooth(HisArr):
 	return smooth histogram
 
 
-def CombineFigures(img1, img2, model):
+CombineFigures(img1, img2, model):
 	#This function will combine two figures in different RGB channel
 	
 	img1 = initial image
@@ -112,13 +112,57 @@ def CombineFigures(img1, img2, model):
 	return the RGB boundary image
 
 
-def GetPeak(Histogram, N_Cluster):
+GetPeak(Histogram, N_Cluster):
 	This function will get the peak of image from N_Cluster as close as possible.
 	
 	Histogram = [histogram array]
 	N_Cluster = the number of peak you need 
 
 	return The data of all peak interval
+
+
+CARLA(Histogram, PairOfZC)
+	Continuous Action Reinforcement Learning Automaton Method Main Function
+	This function will use CARLA to solve a GMM model to connect the input Histogram
+
+	Histogram = [histogram which want to likelihood]
+	PairOfZC = [learning initial data]
+
+	return Data after learning
+
+	**CAUTION:1st TO DETERMINE CALLING C CODE SUCCEED, IT IS NECESSARY TO CALL Pre_CARLA()
+				  FUNCTION BEFORE USING THE FUNCTION
+			  2nd THIS FUNCTION WILL BUILD TWO FILES, ONE IS tem.py TO SAVE LEARNING DATA
+			  	  THE OTHER IS Input.out SAVE INITIAL DATA FOR C CODE
+			  3rd THIS FUNCTION WILL READ DATA FROM THE FILE Output.out AFTER C CODE CALLING
+			  4th YOU CAN CHANGE THE LEARNING FUCNTION IN Constant.py
+
+
+Pre_CARLA():
+	This is the pre-treatment function of CARLA,
+	
+	return None
+
+	** CAUTION: IF YOU ARE LINUX OR MACOS USER, IT IS NECESSARY TO DETERMINE THE LOCATION OF 
+			    PYTHON COMPILE FILE BEFORE YOU USE THIS FUNCTION. YOU CAN DETERMINE IT IN 
+			    Constabt.py 
+
+
+GMM_THS(Histogram, DataLast):
+	This fucntion will return GMM Ths after CARLA 
+
+	Histogram = [histogram learning]
+	DataLast = [data after learning]
+
+	return Thresholding in GMM
+
+
+Histogram(TobBlock)
+	This function will return histogram after Toboggan
+
+	TobBlock = Toboggan algorithm block infomathon
+
+	return histogram
 """
 
 
@@ -167,6 +211,7 @@ def Histogram(img):
 	return Probability
 
 
+
 def DerHis(HisArr):
 	Der1 = [0.00 for n in range(257)]
 	for i in range(0, len(Der1)):
@@ -177,6 +222,7 @@ def DerHis(HisArr):
 		Der2[i] = Der1[i+1] - Der1[i]
 
 	return Der2
+
 
 
 def Sta2Der(DerArr):
@@ -220,6 +266,7 @@ def Sta2Der(DerArr):
 			PairZero.append([ZeroCross[2 * i], ZeroCross[2 * i + 1]])
 
 	return PairZero
+
 
 
 def ZCAnalysis(img, GausData):
@@ -271,6 +318,7 @@ def FigurePrint(img, kind):
 	return
 
 
+
 def ProbLearn(HisArr, ZeroC):
 	mu = []
 	sigma = []
@@ -311,6 +359,7 @@ def ProbLearn(HisArr, ZeroC):
 	return ZeroC
 
 
+
 def Thresholding(img, TSH, TSH2):
 	TemImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
 	for i in range(0, len(img)):
@@ -321,6 +370,7 @@ def Thresholding(img, TSH, TSH2):
 				TemImg[i][j] = 255
 
 	return cv2.Canny(np.uint8(TemImg), 85, 170)
+
 
 
 def Output(img, Name, kind):
@@ -347,6 +397,7 @@ def Output(img, Name, kind):
 				os.system("mkdir Saving")
 			os.system("move " + Name + " Saving/" + Name)		
 	return
+
 
 
 def AutoTH(Histogram, varTH):
@@ -422,6 +473,7 @@ def HistSmooth(HisArr):
 	return np.convolve(HisArr, Constant.GauKernel, mode='full')
 
 
+
 def CombineFigures(img1, img2, model):
 	#This function will combine two figures in different RGB channel
 	#Where img1 is initial image, img2 is boundary image
@@ -440,6 +492,7 @@ def CombineFigures(img1, img2, model):
 		img.append(imgLine)
 	#Init.ArrOutput(img, 1)
 	return np.array(img)
+
 
 
 def GetPeak(Histogram, N_Cluster):
@@ -473,3 +526,143 @@ def GetPeak(Histogram, N_Cluster):
 		PairOfZC.append([PeaksFinal[i] - 1, PeaksFinal[i]])
 	return PairOfZC	
 	
+
+
+def CARLA(Histogram, PairOfZC):
+	#==============================================================================
+	#Histogram Saving and output
+	String = "Histogram = "
+	String += str(Histogram)
+	FileName = "tem.py"
+	File = open(FileName, "w")
+	File.write(String)
+	File.close()
+
+
+	#==============================================================================
+	#Data Saving
+	String = ""
+	String += str(len(PairOfZC) * 3) + " " + str(Constant.Loop) + " " + str(Constant.gw) + " " + str(Constant.gh) + " " + Constant.mode + "\n"
+	for i in range(0, len(PairOfZC)):
+		String += str(0.0) + " " + str(1.0) + "\n"
+		String += str(0) + " " + str(255) + "\n"
+		String += str(PairOfZC[i][0]) + " " + str(PairOfZC[i][1]) + "\n"
+	FileName = "Input.out"
+	os.system("rm " + FileName)
+	Init.BuildFile(FileName)
+	File = open(FileName, "a")
+	File.write(String)
+	File.close()
+	
+
+	#==============================================================================
+	#Main Algorithm in C
+	if Init.SystemJudge() == 0:
+		os.system("./CARLA")
+	else:
+		os.system("CARLA.exe")
+	
+
+	#==============================================================================
+	#Read the output file
+	FileName = "Output.out"
+	File = open(FileName, "r")
+	Data = []
+	while 1:
+		FileLine = File.readline()
+		if not FileLine:
+			break
+		
+		if FileLine[0] == "o":
+			TemStr = ""
+			for i in range(1, len(FileLine)):
+				TemStr += FileLine[i]
+			Data.append(float(TemStr))
+	
+	
+	return Data
+
+
+
+def Pre_CARLA():
+	if Init.SystemJudge() == 0:		
+		os.system("rm CARLA")
+		if Constant.System == "L":
+			os.system("gcc -Wall -lm -I/usr/include/python3.6m CARLA.c -o CARLA -L/usr/lib -lpython3.6m")
+		if Constant.System == "M":
+			os.system("gcc -Wall -lm -I/usr/include/python2.7 CARLA.c -o CARLA -L/usr/lib -lpython2.7")
+	else:
+		os.system("rm CARLA.exe")
+		os.system("gcc CARLA.c")
+
+
+
+def GMM_THS(Histogram, DataLast):
+	Thresholding = []
+	TrueGap = int(len(DataLast) / 3 +0.1)
+	if TrueGap == 1:
+		Sum = 0.00
+		Tem = 0
+		for i in range(0, len(Histogram)):
+			Sum += Histogram[i]
+			if Sum >= 0.5:
+				Tem = i
+				break
+		if Tem != 0:
+			Thresholding.append(Tem)
+		else:
+			Thresholding.append(1)
+
+	else:
+		Value = [[0.00 for n in range(256)] for n in range(TrueGap)]
+		for p in range(0, TrueGap):
+			Prob = DataLast[p * 3]
+			Sigma = DataLast[p * 3 + 1]
+			Mu = DataLast[p * 3 + 2]
+			for q in range(0, 256):
+				Value[p][q] = Prob * math.exp(- (pow(q - Mu, 2) / (2 * Sigma * Sigma))) / (math.sqrt(2 * math.pi) * Sigma)
+		
+		#Init.ArrOutput(Value, 1)
+		RemIma = -1
+		TTL = 0
+		for p in range(0, 256):
+			Ima = -1
+			Maxx = -1
+			for q in range(0, len(Value)):
+				if Value[q][p] > Maxx:
+					Maxx = Value[q][p]
+					Ima = q
+
+			if RemIma != Ima:
+				RemIma = Ima
+				NewTHS = True
+				if len(Thresholding) > 0 and p - Thresholding[len(Thresholding) - 1] < Constant.ThsDis:
+					NewTHS = False
+
+				if NewTHS == False:
+					continue
+				else:
+					Thresholding.append(p)
+					print(p)
+					TTL = 0
+
+	Thresholding.append(256)
+	return Thresholding
+
+
+
+def Histogram(TobBlock):
+	Histogram = [0.00 for n in range(256)]
+	TTL = 0
+	for i in range(0, len(TobBlock)):
+		Histogram[TobBlock[i][1]] += TobBlock[i][4]
+		TTL += TobBlock[i][4]
+	
+	for i in range(0, len(Histogram)):
+		Histogram[i] /= TTL
+	return Histogram
+
+
+
+def DisSeg():
+	return
