@@ -31,6 +31,7 @@ from sklearn.cluster import KMeans
 import Init
 import Pretreatment
 import Constant
+import RWPart
 DEBUG = Constant.DEBUG
 
 
@@ -53,7 +54,7 @@ def Main2(ImageName):
 	
 
 	#==============================================================================
-	#Image input 
+	#Image input
 	img = np.array(Image.open(ImageName).convert("L"))
 	
 
@@ -67,9 +68,23 @@ def Main2(ImageName):
 
 
 	#==============================================================================
-	#Get Histogram
-	Histogram = Pretreatment.Histogram(img)
+	#Toboggan Algorithm
+	TobImage, TobBlock = RWPart.Toboggan()
+	#CAUTION: The block code of Toboggan is begin from 1 rather than 0!!
+	
 
+	#==============================================================================
+	#Get the histogram
+	Histogram = [0 for n in range(len(256))]
+	TTK = 0
+	for i in range(0, len(TobBlock)):
+		Histogram[TobBlock[i][1]] += TobBlock[i][4]
+		TTL += TobBlock[i][4]
+	
+	for i in range(0, len(Histogram)):
+		Histogram[i] /= TTL
+
+	
 
 	#==============================================================================
 	#Histogram Saving and output
@@ -96,6 +111,18 @@ def Main2(ImageName):
 		AnaLine += "\n"
 		print("Cluster Begin")
 
+
+
+	"""
+	#==============================================================================
+	#Calculation of Toboggan Random Walk part
+	#==============================================================================
+	"""
+	#==============================================================================
+	#Get the distant weight matrix
+	
+
+
 	
 	"""
 	#==============================================================================
@@ -113,7 +140,7 @@ def Main2(ImageName):
 			ClusterSet.append([float(img[i][j])])
 	ClusterSet = np.array(ClusterSet)
 	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 20))
-	if N_Cluster == 1:
+	if N_Cluster < 3:
 		N_Cluster = 3
 
 	if DEBUG:
@@ -127,11 +154,13 @@ def Main2(ImageName):
 	DataLast = []
 
 
+
 	"""
 	#==============================================================================
-	#Main Algorithm Loop
+	#Main CARLA Algorithm Loop
 	#==============================================================================
 	"""
+
 	for Gap in range(N_Cluster, 0, -1):
 		#==============================================================================
 		#Pretreatment of CARLA, get the initial data
@@ -160,7 +189,7 @@ def Main2(ImageName):
 
 		"""		
 		#==============================================================================
-		#MAIN ALGORIHTM
+		#CARLA MAIN ALGORIHTM
 		#==============================================================================
 		#Learning Automaton : Continuous Action Reinforcement Learning Automaton 
 		"""
@@ -206,7 +235,7 @@ def Main2(ImageName):
 
 	"""
 	#==============================================================================
-	#Thresholding solution	
+	#Thresholding solution with distance matirx
 	#==============================================================================
 	"""
 	if DEBUG:
@@ -257,17 +286,12 @@ def Main2(ImageName):
 
 
 	#==============================================================================
-	#Figure Segmentation
+	#Segmentation with distance matrix
 	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
-	for i in range(0, len(Thresholding) - 1):
-		TemImg = Pretreatment.Thresholding(img, Thresholding[i], Thresholding[i + 1])
-		for p in range(0, len(OutImg)):
-			for q in range(0, len(OutImg[p])):
-				OutImg[p][q] = max(TemImg[p][q], OutImg[p][q])
 
-	for p in range(0, len(OutImg)):
-		for q in range(0, len(OutImg[p])):
-			OutImg[p][q] = 255 - OutImg[p][q]
+
+
+
 
 
 
@@ -383,33 +407,7 @@ def Main2(ImageName):
 	#==============================================================================
 
 
-"""
-if __name__ == "__main__":
-	os.system("rm -r Output")
-	ImageName = Constant.ImageName
-	img = np.array(Image.open(ImageName).convert("L"))
-	BlockInfo = Pretreatment.Partial(img)
-	os.system("cp -r Output Output1")
-	
-	if DEBUG:
-		print("Block Infomation: " + str(BlockInfo))
-	
-	for i in range(1, len(BlockInfo)):
-		Subimg = np.array(Main2("Output/Block_" + str(i) + ".png"))
-		os.system("rm Output/Block_" + str(i) + ".png")
-		for p in range(0, len(Subimg)):
-			for q in range(0, len(Subimg[p])):
-				Subimg[p][q] = min(max(int(Subimg[p][q]), 0), 255)
-		
-		#circles1 = cv2.HoughCircles(Subimg, cv2.HOUGH_GRADIENT, 1, 100, param1=100, param2=30, minRadius=200, maxRadius=300)
-		#circles = circles1[0, :, :]
-		#for i in circles[:]: 
-		#	cv2.circle(img, (i[0], i[1]), i[2], 128, 5)
-		
-		Pretreatment.Output(Subimg, "Block_" + str(i) + ".png", 1) 
-	Pretreatment.Recovery(len(BlockInfo), BlockInfo, "Out.jpg")
 
-"""
 ImageName = Constant.ImageName
 Main2(ImageName)
 

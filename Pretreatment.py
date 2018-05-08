@@ -17,6 +17,7 @@ Histogram(img)
 	
 	return Histogram array based on probability 
 
+
 DerHis(HisArr)
 	This function will get the second order derivative of the 
 	histogram array
@@ -25,6 +26,7 @@ DerHis(HisArr)
 
 	return 2nd order derivative array
 
+
 Sta2Der(DerArr)
 	This function will find the zero crossing of the histogram array
 
@@ -32,7 +34,93 @@ Sta2Der(DerArr)
 	
 	return Array of Pair of zero crossing as [[minvalue, maxvalur]...]
 
+
+ZCAnalysis(img, GausData)
+	This algorithm will get zero crossing data of the histogram
+
+	img = [image array]
+	GausData = [Histogram after gaussian smoothing]
+
+	return image after Zero crossing 
+
+
+FigurePrint(img, kind):
+	This function will print and output a image
+	
+	img = [image array]
+	kind = working method
+
+	**This function is a historical function, do not using it any more.
+
+
+ProbLearn(HisArr, ZeroC)
+	This function will return fully histogram after expose
+	
+	HisArr = [Array of histogram]
+	ZeroC = [Data of initial parameter interval]
+	
+	return Parameter interval after expose
+
+
+Thresholding(img, TSH, TSH2)
+	This algorithm will change the grey pixel from THS to THS2 as white and return the boundary
+
+	img = [array of the whole image]
+	THS = the minimum thresholding
+	THS = the maxinum thresholding
+
+
+Output(img, Name, kind)
+	**DO NOT USE THIS FUCNTION ANY MORE
+
+
+AutoTH(Histogram, varTH):
+	**DO NOT USE THIE FUNCTION ANY MORE
+
+
+def Partial(img):
+	This function will block a large image as small block
+
+	img = [array of large image ]
+
+	return Infomation of all blocks
+
+	**CAUTION: This function will save all the blocked image as files
+
+
+
+def Recovery(BlockSize, BlockInfo, ImageName):
+	This function will recovery all images from protial
+
+
+def HistSmooth(HisArr):
+	This function will smooth histogram
+
+	HisArr = [the histogram you want to smooth]
+
+	return smooth histogram
+
+
+def CombineFigures(img1, img2, model):
+	#This function will combine two figures in different RGB channel
+	
+	img1 = initial image
+	img2 = boundary image
+	model = 1, means background is 255 and 
+		    0, means 0
+	
+	return the RGB boundary image
+
+
+def GetPeak(Histogram, N_Cluster):
+	This function will get the peak of image from N_Cluster as close as possible.
+	
+	Histogram = [histogram array]
+	N_Cluster = the number of peak you need 
+
+	return The data of all peak interval
 """
+
 
 #import head
 from PIL import Image

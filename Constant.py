@@ -55,7 +55,22 @@ ImageName = "Figure/09.png"
 #This is the file you want the algorithm working on it.
 
 
+#==============================================================================
+#Global variable:   Alpha: A parameter about the relationship between weight and Grey
+Alpha = 0.5
 
+
+#==============================================================================
+#Global variable:   Beta:  A parameter about the relationship between weight and Distance
+Beta = 0.5
+
+
+
+
+
+#==============================================================================
+#Cost function, using in CARLA learning main algorithm
+#C code will find this function automaton, so donot change the name of this fucntion
 def Cost(Parameter):
 	import math
 	import tem
@@ -75,8 +90,10 @@ def Cost(Parameter):
 
 
 
+
 #==============================================================================
-#Parameter check, DO NOT CHANGE THIS FUCNTION
+#Parameter check function, DO NOT CHANGE THIS FUCNTION
+#==============================================================================
 def ParameterDetermine():
 	#This function will determine all parameter is legal or not
 	#Parameter of CARLA
