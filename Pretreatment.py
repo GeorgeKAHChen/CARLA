@@ -467,8 +467,6 @@ def GetPeak(Histogram, N_Cluster):
 			peaks[0] = peaks[2]
 			continue
 
-	if PeaksFinal[len(PeaksFinal)-1] == 255:
-		PeaksFinal[len(PeaksFinal)-1] = 254
 
 	PairOfZC = []
 	for i in range(0, len(PeaksFinal)):

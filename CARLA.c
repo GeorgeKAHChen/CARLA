@@ -272,6 +272,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 	/*
 		=========================Calculate the cost J=========================
 	*/
+
 		//import python function - Initial
 		Py_Initialize();
 		
@@ -294,7 +295,7 @@ void Algorithm(const int var, const int ttl, const double gw, const double gh, c
 
 
 		//import File (CAUTION: FileName without .py)
-		pName = PyString_FromString("Constant");
+		pName = PyUnicode_FromString("Constant");
 		pModule = PyImport_Import(pName);
 		if(!pModule) {
 			printf("Load Constant.py failed!\n");

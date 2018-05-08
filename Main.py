@@ -284,7 +284,7 @@ def Main2(ImageName):
 			for q in range(p + 1, len(SubBlock)):
 				tem1 = BlockSet[p]
 				tem2 = BlockSet[q]
-				SubBlock[p][q] = sqrt( pow(TobBlock[tem1][2] - TobBlock[tem2][2], 2) + pow(TobBlock[tem1][3] - TobBlock[tem2][3], 2) )
+				SubBlock[p][q] = math.sqrt( pow(TobBlock[tem1][2] - TobBlock[tem2][2], 2) + pow(TobBlock[tem1][3] - TobBlock[tem2][3], 2) )
 				SubBlock[q][p] = SubBlock[p][q]
 				SizeSet.append(SubBlock[p][q])
 		AveDis = sum(SizeSet) / len(SizeSet)
