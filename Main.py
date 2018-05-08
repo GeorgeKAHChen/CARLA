@@ -124,6 +124,7 @@ def Main2(ImageName):
 
 	#==============================================================================
 	#Gap statistic and judgement
+	"""
 	optimalK = OptimalK(parallel_backend = 'joblib')
 	ClusterSet = []
 	for i in range(0, len(img)):
@@ -133,7 +134,8 @@ def Main2(ImageName):
 	N_Cluster = optimalK(ClusterSet, cluster_array = np.arange(1, 20))
 	if N_Cluster < 3:
 		N_Cluster = 3
-
+	"""
+	N_Cluster = 20
 	if DEBUG:
 		print("Cluster = " + str(N_Cluster))
 
@@ -156,10 +158,12 @@ def Main2(ImageName):
 		#==============================================================================
 		#Pretreatment of CARLA, get the initial data
 		PairOfZC = Pretreatment.GetPeak(Histogram, Gap)
+		if len(PairOfZC) == 0:
+			break
 		if DEBUG:
 			print(len(PairOfZC), Gap)
 		PairOfZC = Pretreatment.ProbLearn(Histogram, PairOfZC)
-
+		
 
 		#==============================================================================
 		#Data Saving
