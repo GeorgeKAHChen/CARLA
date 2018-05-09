@@ -650,6 +650,3 @@ def Histogram(TobBlock):
 	return Histogram
 
 
-
-def DisSeg():
-	return

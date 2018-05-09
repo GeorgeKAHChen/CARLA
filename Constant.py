@@ -14,7 +14,7 @@
 #Usually let gw = 0.02, gh = 0.3 and Loop = 2000 in paper
 gw = 0.02
 gh = 0.3
-Loop = 500
+Loop = 1000
 
 
 #==============================================================================
@@ -43,12 +43,18 @@ ImageName = "Figure/aznyan.jpg"
 
 #==============================================================================
 #System parameter
-System = "L"
+System = "M"
 
 
 #==============================================================================
 #Distance between two thresholding
 ThsDis = 5
+
+
+
+#==============================================================================
+#Distant parameter for toboggan block number
+DisPar = 0.05
 
 
 
@@ -89,10 +95,6 @@ def ParameterDetermine():
 
 	if DEBUG == True:
 		print("CAUTION: DEBUG MODEL")
-
-	if Tsukaikata != "F" and Tsukaikata != "M":
-		print("Problem method error")
-		NoError = False
 
 	if not os.path.exists(ImageName):
 		print("File not exist")

@@ -19,21 +19,6 @@ Toboggan(img)
 
 	return [the image array coding with Toboggan], [The infomation of all block, include[Code, Grey, LocX, LocY, Size]]
 
-
-WeightFunc(Point1, Point2)
-	This function will calculate the weight between two node
-
-	Point1 = [BlockCode1, Grey1, LocX1, LocY1]
-	Point2 = [BlockCode2, Grey2, LocX2, LocY2]
-
-	return The probability between two node
-
-Laplacian(NodeInfo, VarL)
-	This function will return normalization laplacian matrix 
-
-	NodeInfo = [array of all node after Toboggan]
-	VarL = 
-
 """
 
 
@@ -54,6 +39,7 @@ import random
 #import files
 import Init
 import Constant
+import Pretreatment
 DEBUG = Constant.DEBUG
 
 
@@ -139,6 +125,32 @@ def Toboggan(img):
 			BlockInfo[SavArr[i][j]][4] += 1
 
 	return [SavArr, BlockInfo]
+
+
+
+def TobBoundary(TobImage, TobBlock, BlockArea):
+	for i in range(0, len(TobImage)):
+		for j in range(0, len(TobImage[i])):
+			if TobImage[i][j] == -1:
+				continue
+
+			TobImage[i][j] = TobBlock[TobImage[i][j]][0]
+	
+	OutImg = [[255 for n in range(len(TobImage[1]))] for i in range(len(TobImage))]
+	for i in range(0, BlockArea):
+		BlankImg = [[0 for n in range(len(TobImage[1]))] for i in range(len(TobImage))]
+		for p in range(0, len(TobImage)):
+			for q in range(0, len(TobImage[p])):
+				if TobImage[p][q] == i:
+					BlankImg[p][q] = 255
+
+		BlankImg = cv2.Canny(np.uint8(BlankImg), 85, 170)
+		for p in range(0, len(BlankImg)):
+			for q in range(0, len(BlankImg[p])):
+				if BlankImg[p][q] > 200:
+					OutImg[p][q] = 0
+
+	return OutImg
 
 
 

@@ -42,6 +42,8 @@ def Main2(ImageName):
 	#Pretreatments and Definition
 	#==============================================================================
 	"""
+	if DEBUG:
+		print("Pretreatment")
 	#==============================================================================	
 	#Parameter check and import package
 	if Constant.ParameterDetermine() == False:
@@ -70,11 +72,13 @@ def Main2(ImageName):
 	#Pre-Processing Algorithm and Claculation
 	#==============================================================================
 	"""
+	if DEBUG:
+		print("Pre-Processing Algorithm and Claculation")
 	#==============================================================================
 	#Toboggan Algorithm
 	TobImage, TobBlock = RWPart.Toboggan(img)
 	#CAUTION: The block code of Toboggan is begin from 1 rather than 0!!
-	
+	Init.ArrOutput(TobImage, 1)
 	#==============================================================================
 	#Get the histogram
 	Histogram = Pretreatment.Histogram(TobBlock)
@@ -86,11 +90,14 @@ def Main2(ImageName):
 
 
 
+
 	"""
 	#==============================================================================
-	#Main CARLA Algorithm Loop
+	#Main CARLA Algorithm
 	#==============================================================================
 	"""
+	if DEBUG:
+		print("Grey GMM model calculation")
 	#==============================================================================
 	#Pretreatment of CARLA, get the initial data
 	PairOfZC = Pretreatment.ProbLearn(Histogram, Pretreatment.GetPeak(Histogram, N_Cluster))
@@ -108,7 +115,13 @@ def Main2(ImageName):
 		AnaLine += "tem = "
 		AnaLine += str(DataLast)
 		AnaLine += ";\n"
-
+		AnaLine += "ths = "
+		AnaLine += str(Thresholding)
+		AnaLine += ";\n"
+		FileName = "SaveArrTem"
+		File = open(FileName, "w")
+		File.write(AnaLine)
+		File.close()
 
 
 	"""
@@ -116,10 +129,13 @@ def Main2(ImageName):
 	#Thresholding solution with distance matirx
 	#==============================================================================
 	"""
+	if DEBUG:
+		print("Thresholding solution with GMM")
 	#==============================================================================
 	#Segmentation with distance matrix
 	BlockArea = 0
 	for i in range(0, len(Thresholding) - 1):
+		print(str(i) + "/" + str(len(Thresholding)), end = "\r")
 		Interval = [Thresholding[i], Thresholding[i + 1]]
 		BlockSet = []
 		for j in range(1, len(TobBlock)):
@@ -149,10 +165,10 @@ def Main2(ImageName):
 		DisTHS = Pretreatment.GMM_THS(Num, DataLast)
 		ValThs = DisTHS[1]
 
-		BlockProb = [0.00 for n in range(len(SizeSet))]
+		BlockProb = [0.00 for n in range(len(SubBlock))]
 		TTL = 0
-		for p in range(0, len(BlockProb)):
-			for q in range(0, len(BlockProb)):
+		for p in range(0, len(SubBlock)):
+			for q in range(0, len(SubBlock[p])):
 				if p == q:
 					continue
 				TTL += 1
@@ -162,11 +178,9 @@ def Main2(ImageName):
 		for p in range(0, len(BlockProb)):
 			BlockProb[p] /= TTL
 			if BlockProb[p] >= Constant.DisPar:
-				TobBlock[SizeSet[p]] = BlockArea
+				TobBlock[SizeSet[p]][0] = BlockArea
 
 		BlockArea += 1
-
-
 
 		if DEBUG:
 			if i == 0:
@@ -181,12 +195,14 @@ def Main2(ImageName):
 			File.close()
 
 
-
+	if DEBUG:
+		print(str(len(Thresholding)) + "/" + str(len(Thresholding)))
+		print("Boudary searching")
 
 	for i in range(1, len(TobBlock)):
 		if TobBlock[i][0] != -1:
 			continue
-
+		print("sb")
 		Dis = [99999999 for n in range(len(TobBlock))]
 		for j in range(1, len(TobBlock)):
 			if TobBlock[j][0] == -1:
@@ -199,20 +215,9 @@ def Main2(ImageName):
 				Size = Dis[j]
 				TobBlock[i][0] = TobBlock[j][0]
 
+	Init.ArrOutput(TobBlock, 1)
+	OutImg = RWPart.TobBoundary(TobImage, TobBlock, BlockArea - 1)
 
-	
-
-
-	OutImg = [[0.00 for n in range(len(img[0]))] for n in range(len(img))]
-
-	if DEBUG:
-		AnaLine += "ths = "
-		AnaLine += str(Thresholding)
-		AnaLine += ";\n"
-		FileName = "SaveArrTem"
-		File = open(FileName, "w")
-		File.write(AnaLine)
-		File.close()
 
 
 
@@ -221,6 +226,8 @@ def Main2(ImageName):
 	#Output and Print
 	#==============================================================================
 	"""
+	if DEBUG:
+		print("Output and Print")
 	if Constant.mode == "p":
 		plt.imshow(OutImg, cmap="gray")
 		plt.axis("off")
