@@ -54,7 +54,7 @@ ThsDis = 5
 
 #==============================================================================
 #Distant parameter for toboggan block number
-DisPar = 0.05
+DisPar = 0.01
 
 
 

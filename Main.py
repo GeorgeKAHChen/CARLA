@@ -135,7 +135,7 @@ def Main2(ImageName):
 	#Segmentation with distance matrix
 	BlockArea = 0
 	for i in range(0, len(Thresholding) - 1):
-		print(str(i) + "/" + str(len(Thresholding)), end = "\r")
+		print(str(i) + "/" + str(len(Thresholding)))
 		Interval = [Thresholding[i], Thresholding[i + 1]]
 		BlockSet = []
 		for j in range(1, len(TobBlock)):
@@ -145,6 +145,7 @@ def Main2(ImageName):
 		
 
 		SizeSet = []
+		TTL = 0
 		for p in range(0, len(SubBlock)):
 			for q in range(p + 1, len(SubBlock)):
 				tem1 = BlockSet[p]
@@ -152,42 +153,45 @@ def Main2(ImageName):
 				SubBlock[p][q] = math.sqrt( pow(TobBlock[tem1][2] - TobBlock[tem2][2], 2) + pow(TobBlock[tem1][3] - TobBlock[tem2][3], 2) )
 				SubBlock[q][p] = SubBlock[p][q]
 				SizeSet.append(SubBlock[p][q])
+				TTL += 2
 		AveDis = sum(SizeSet) / len(SizeSet)
 		
 
 		Num = [0 for n in range(int(max(SizeSet) + 1))]
-		for i in range(0, len(SizeSet)):
-			Num[int(SizeSet[i])] += 1
-
+		for p in range(0, len(SizeSet)):
+			Num[int(SizeSet[p])] += 1
+		for p in range(0, len(Num)):
+			Num[p] /= TTL
+		print(Num)
 
 		PairOfZC = Pretreatment.ProbLearn(Num, Pretreatment.GetPeak(Num, 10))
 		DataLast = Pretreatment.CARLA(Num, PairOfZC)
 		DisTHS = Pretreatment.GMM_THS(Num, DataLast)
 		ValThs = DisTHS[1]
 
-		BlockProb = [0.00 for n in range(len(SubBlock))]
-		TTL = 0
-		for p in range(0, len(SubBlock)):
-			for q in range(0, len(SubBlock[p])):
-				if p == q:
-					continue
-				TTL += 1
-				if SubBlock[p][q] < ValThs:
-					BlockProb[p] += 1
 
-		for p in range(0, len(BlockProb)):
-			BlockProb[p] /= TTL
-			if BlockProb[p] >= Constant.DisPar:
-				TobBlock[SizeSet[p]][0] = BlockArea
+		DisProb = [0.00 for n in range(len(BlockSet))]
+		for p in range(0, len(SubBlock)):
+			for q in range(p + 1, len(SubBlock)):
+				if SubBlock[p][q] <= ValThs:
+					DisProb[p] += 1
+					DisProb[q] += 1
+
+
+		for p in range(0, len(DisProb)):
+			if DisProb[p] > Constant.DisPar:
+				TobBlock[BlockSet[p]][0] = BlockArea
+ 
 
 		BlockArea += 1
+
 
 		if DEBUG:
 			if i == 0:
 				os.system("rm -r CARLA-test/Data")
 				os.system("mkdir CARLA-test/Data")
 			OutArr = "sjb = "
-			OutArr += str(SizeSet)
+			OutArr += str(BlockProb)
 			OutArr += "\n"
 			FileName = "CARLA-test/Data/ArrFile" + str(i) + ".py"
 			File = open(FileName, "w")
@@ -202,7 +206,6 @@ def Main2(ImageName):
 	for i in range(1, len(TobBlock)):
 		if TobBlock[i][0] != -1:
 			continue
-		print("sb")
 		Dis = [99999999 for n in range(len(TobBlock))]
 		for j in range(1, len(TobBlock)):
 			if TobBlock[j][0] == -1:

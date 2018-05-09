@@ -489,7 +489,11 @@ def GetPeak(Histogram, N_Cluster):
 
 	while 1:
 		if peaks[0] > N_Cluster and peaks[1] < N_Cluster:
-			PeaksFinal = signal.find_peaks_cwt(Histogram, np.arange(1, size[2]))
+			tem = signal.find_peaks_cwt(Histogram, np.arange(1, size[2]))
+			if len(tem) == 0:
+				break
+
+			PeaksFinal = tem
 			peaks[2] = len(PeaksFinal)
 		
 		if size[1] - size[0] <= 1 or peaks[2] == N_Cluster or peaks[0] < N_Cluster or peaks[1] > N_Cluster:
@@ -511,6 +515,8 @@ def GetPeak(Histogram, N_Cluster):
 	PairOfZC = []
 	for i in range(0, len(PeaksFinal)):
 		PairOfZC.append([PeaksFinal[i] - 1, PeaksFinal[i]])
+	if len(PairOfZC) == 0:
+		PairOfZC = GetPeak(Histogram, 2 * N_Cluster)
 	return PairOfZC	
 	
 
