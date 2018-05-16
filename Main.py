@@ -74,11 +74,18 @@ def Main2(ImageName):
 	"""
 	if DEBUG:
 		print("Pre-Processing Algorithm and Claculation")
+	
 	#==============================================================================
 	#Toboggan Algorithm
 	TobImage, TobBlock = RWPart.Toboggan(img)
 	#CAUTION: The block code of Toboggan is begin from 1 rather than 0!!
-	Init.ArrOutput(TobImage, 1)
+	if DEBUG:
+		#Init.ArrOutput(img, 1)
+		#import time 
+		#time.sleep(5)
+		#Init.ArrOutput(TobImage, 1)
+		pass
+
 	#==============================================================================
 	#Get the histogram
 	Histogram = Pretreatment.Histogram(TobBlock)
@@ -164,7 +171,7 @@ def Main2(ImageName):
 			Num[p] /= TTL
 		print(Num)
 
-		PairOfZC = Pretreatment.ProbLearn(Num, Pretreatment.GetPeak(Num, 10))
+		PairOfZC = Pretreatment.ProbLearn(Num, Pretreatment.GetPeak(Num, 5))
 		DataLast = Pretreatment.CARLA(Num, PairOfZC)
 		DisTHS = Pretreatment.GMM_THS(Num, DataLast)
 		ValThs = DisTHS[1]
@@ -251,6 +258,97 @@ def Main2(ImageName):
 	#==============================================================================
 	#==============================================================================
 
+
+
+
+
+#For toboggan debug!!
+def Main1(ImageName):
+	"""
+	#==============================================================================
+	#Pretreatments and Definition
+	#==============================================================================
+	"""
+	if DEBUG:
+		print("Pretreatment")
+	#==============================================================================	
+	#Parameter check and import package
+	if Constant.ParameterDetermine() == False:
+		return
+
+	#==============================================================================
+	#For output to matlab image statistic
+	AnaLine = ""
+	
+	#==============================================================================
+	#Image input
+	img = np.array(Image.open(ImageName).convert("L"))
+
+	#==============================================================================
+	#Initial CARLA
+	Pretreatment.Pre_CARLA()
+
+	#==============================================================================
+	#Give Minimum number of GMM model
+	N_Cluster = 20
+
+
+
+	"""
+	#==============================================================================
+	#Pre-Processing Algorithm and Claculation
+	#==============================================================================
+	"""
+	if DEBUG:
+		print("Pre-Processing Algorithm and Claculation")
+	
+	#==============================================================================
+	#Toboggan Algorithm
+	TobImage, TobBlock = RWPart.Toboggan(img)
+	#CAUTION: The block code of Toboggan is begin from 1 rather than 0!!
+	if DEBUG:
+		#Init.ArrOutput(img, 1)
+		#import time 
+		#time.sleep(5)
+		#Init.ArrOutput(TobImage, 1)
+		pass
+
+	#==============================================================================
+	#Get the histogram
+	Histogram = Pretreatment.Histogram(TobBlock)
+	
+	if DEBUG:
+		AnaLine += "His = "
+		AnaLine += str(Histogram)
+		AnaLine += ";\n"
+
+
+	tem = 127
+	OutImage = [[0 for n in range(len(img[1]))] for n in range(len(img))]
+	for i in range(0, len(TobBlock)):
+		if i % 100 == 0:
+			for p in range(0, len(OutImage)):
+				for q in range(0, len(OutImage[p])):
+					if TobImage[p][q] == i:
+						OutImage[p][q] = tem
+			tem = (tem + 128) % 255
+	OutImg = OutImage
+	for p in range(0, len(OutImg)):
+		for q in range(0, len(OutImg[p])):
+			OutImg[p][q] = 255 - OutImg[p][q]
+
+
+	"""
+	#==============================================================================
+	# output
+	#==============================================================================
+	"""
+
+	OutImg = Pretreatment.CombineFigures(img, OutImg, 1)
+	misc.imsave("Saving/result.png", OutImg)
+	return OutImg
+	#==============================================================================
+	#==============================================================================
 
 
 

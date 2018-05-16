@@ -54,15 +54,15 @@ def Toboggan(img):
 
 	for i in range(0, len(img1)):
 		for j in range(0, len(img1[i])):
-			Gradient[i][j] = int(math.sqrt(pow(img1[i][j], 2)+pow(img2[i][j], 2)))
+			Gradient[i][j] = math.sqrt(pow(img1[i][j], 2)+pow(img2[i][j], 2))
 
 	Tem = 0
 	Tem1 = -1
 	Color = [[0, 0]]
 	Loc = [[0, 0]]
 	#MainLoop
-	for i in range(1, len(SavArr)-1):
-		for j in range(1, len(SavArr[i])-1):
+	for i in range(0, len(SavArr)):
+		for j in range(0, len(SavArr[i])):
 			if SavArr[i][j] != -1:
 				continue
 
@@ -96,13 +96,14 @@ def Toboggan(img):
 						Poi = 0
 						try:
 							Poi = Gradient[Vari+p][Varj+q]
+							Block.append([Gradient[Vari+p][Varj+q], Vari+p, Varj+q])
 						except:
 							continue
-						Block.append([Gradient[Vari+p][Varj+q], Vari+p, Varj+q])
+						
 
 				Block.sort()
 				for k in range(0, len(Block)):
-					if SavArr[Block[k][1]][Block[k][2]] == -1 and Block[k][1] > 0 and Block[k][2] > 0:
+					if SavArr[Block[k][1]][Block[k][2]] == -1 and Block[k][1] != Loc[len(Color)-1][0] and Block[k][2] != Loc[len(Color)-1][1]:
 						#This judgement may have some bug
 						Stack.append([Block[k][1], Block[k][2]])
 						break
